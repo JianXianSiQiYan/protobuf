@@ -64,6 +64,7 @@ namespace io {
 // ===================================================================
 
 // A ZeroCopyInputStream backed by an in-memory array of bytes.
+//ok
 class PROTOBUF_EXPORT ArrayInputStream : public ZeroCopyInputStream {
  public:
   // Create an InputStream that returns the bytes pointed to by "data".
@@ -96,8 +97,8 @@ class PROTOBUF_EXPORT ArrayInputStream : public ZeroCopyInputStream {
 };
 
 // ===================================================================
-
 // A ZeroCopyOutputStream backed by an in-memory array of bytes.
+//ok
 class PROTOBUF_EXPORT ArrayOutputStream : public ZeroCopyOutputStream {
  public:
   // Create an OutputStream that writes to the bytes pointed to by "data".
@@ -130,6 +131,7 @@ class PROTOBUF_EXPORT ArrayOutputStream : public ZeroCopyOutputStream {
 // ===================================================================
 
 // A ZeroCopyOutputStream which appends bytes to a string.
+//待定，不是很明白
 class PROTOBUF_EXPORT StringOutputStream : public ZeroCopyOutputStream {
  public:
   // Create a StringOutputStream which appends bytes to the given string.
@@ -138,6 +140,7 @@ class PROTOBUF_EXPORT StringOutputStream : public ZeroCopyOutputStream {
   // stream. Either be sure there's no further usage, or (safest) destroy the
   // stream before using the contents.
   //
+  //这句话是看不懂了
   // Hint:  If you call target->reserve(n) before creating the stream,
   //   the first call to Next() will return at least n bytes of buffer
   //   space.
@@ -157,6 +160,7 @@ class PROTOBUF_EXPORT StringOutputStream : public ZeroCopyOutputStream {
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(StringOutputStream);
 };
 
+//进度
 // Note:  There is no StringInputStream.  Instead, just create an
 // ArrayInputStream as follows:
 //   ArrayInputStream input(str.data(), str.size());
@@ -174,6 +178,7 @@ class PROTOBUF_EXPORT StringOutputStream : public ZeroCopyOutputStream {
 // CopyingInputStream implementations should avoid buffering if possible.
 // CopyingInputStreamAdaptor does its own buffering and will read data
 // in large blocks.
+//ok
 class PROTOBUF_EXPORT CopyingInputStream {
  public:
   virtual ~CopyingInputStream() {}
@@ -202,6 +207,7 @@ class PROTOBUF_EXPORT CopyingInputStream {
 // respectively.
 class PROTOBUF_EXPORT CopyingInputStreamAdaptor : public ZeroCopyInputStream {
  public:
+     //进度
   // Creates a stream that reads from the given CopyingInputStream.
   // If a block_size is given, it specifies the number of bytes that
   // should be read and returned with each call to Next().  Otherwise,
@@ -268,6 +274,7 @@ class PROTOBUF_EXPORT CopyingInputStreamAdaptor : public ZeroCopyInputStream {
 // CopyingOutputStream implementations should avoid buffering if possible.
 // CopyingOutputStreamAdaptor does its own buffering and will write data
 // in large blocks.
+//待定
 class PROTOBUF_EXPORT CopyingOutputStream {
  public:
   virtual ~CopyingOutputStream() {}
@@ -276,7 +283,7 @@ class PROTOBUF_EXPORT CopyingOutputStream {
   // if successful, false on a write error.
   virtual bool Write(const void* buffer, int size) = 0;
 };
-
+//进度
 // A ZeroCopyOutputStream which writes to a CopyingOutputStream.  This is
 // useful for implementing ZeroCopyOutputStreams that write to traditional
 // streams.  Note that this class is not really zero-copy.
@@ -346,6 +353,7 @@ class PROTOBUF_EXPORT CopyingOutputStreamAdaptor : public ZeroCopyOutputStream {
 
 // A ZeroCopyInputStream which wraps some other stream and limits it to
 // a particular byte count.
+//待定，不是很理解
 class PROTOBUF_EXPORT LimitingInputStream : public ZeroCopyInputStream {
  public:
   LimitingInputStream(ZeroCopyInputStream* input, int64_t limit);
@@ -384,16 +392,19 @@ class PROTOBUF_EXPORT LimitingInputStream : public ZeroCopyInputStream {
 // Return a pointer to mutable characters underlying the given string.  The
 // return value is valid until the next time the string is resized.  We
 // trust the caller to treat the return value as an array of length s->size().
+//ok
 inline char* mutable_string_data(std::string* s) {
   // This should be simpler & faster than string_as_array() because the latter
   // is guaranteed to return NULL when *s is empty, so it has to check for that.
   return &(*s)[0];
 }
 
+//这里哪里equivalent了？
 // as_string_data(s) is equivalent to
 //  ({ char* p = mutable_string_data(s); make_pair(p, p != NULL); })
 // Sometimes it's faster: in some scenarios p cannot be NULL, and then the
 // code can avoid that check.
+//待定
 inline std::pair<char*, bool> as_string_data(std::string* s) {
   char* p = mutable_string_data(s);
   return std::make_pair(p, true);

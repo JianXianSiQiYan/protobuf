@@ -1,3 +1,4 @@
+//ok
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -124,6 +125,7 @@ class ZeroCopyOutputStream;
 
 // Abstract interface similar to an input stream but designed to minimize
 // copying.
+//ok
 class PROTOBUF_EXPORT ZeroCopyInputStream {
  public:
   ZeroCopyInputStream() {}
@@ -181,6 +183,7 @@ class PROTOBUF_EXPORT ZeroCopyInputStream {
 
 // Abstract interface similar to an output stream but designed to minimize
 // copying.
+//ok
 class PROTOBUF_EXPORT ZeroCopyOutputStream {
  public:
   ZeroCopyOutputStream() {}
@@ -229,6 +232,7 @@ class PROTOBUF_EXPORT ZeroCopyOutputStream {
   // Returns the total number of bytes written since this object was created.
   virtual int64_t ByteCount() const = 0;
 
+  //搞不懂这里alias的意思是什么
   // Write a given chunk of data to the output.  Some output streams may
   // implement this in a way that avoids copying. Check AllowsAliasing() before
   // calling WriteAliasedRaw(). It will GOOGLE_CHECK fail if WriteAliasedRaw() is
@@ -241,6 +245,7 @@ class PROTOBUF_EXPORT ZeroCopyOutputStream {
 
 
  private:
+    //禁止复制、复制构造
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ZeroCopyOutputStream);
 };
 

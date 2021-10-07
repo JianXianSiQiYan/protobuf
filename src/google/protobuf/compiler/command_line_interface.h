@@ -395,9 +395,10 @@ class PROTOC_EXPORT CommandLineInterface {
 
   // True if we should treat warnings as errors that fail the compilation.
   bool fatal_warnings_ = false;
-
+    //依赖的protobuf文件
   std::vector<std::pair<std::string, std::string> >
       proto_path_;                        // Search path for proto files.
+    //将要编译的文件
   std::vector<std::string> input_files_;  // Names of the input proto files.
 
   // Names of proto files which are allowed to be imported. Used by build

@@ -963,6 +963,7 @@ PopulateSingleSimpleDescriptorDatabase(const std::string& descriptor_set_name);
 
 int CommandLineInterface::Run(int argc, const char* const argv[]) {
   Clear();
+  //进度
   switch (ParseArguments(argc, argv)) {
     case PARSE_ARGUMENT_DONE_AND_EXIT:
       return 0;
@@ -988,6 +989,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
 
   // Any --descriptor_set_in FileDescriptorSet objects will be used as a
   // fallback to input_files on command line, so create that db first.
+  //待定
   if (!descriptor_set_in_names_.empty()) {
     for (const std::string& name : descriptor_set_in_names_) {
       std::unique_ptr<SimpleDescriptorDatabase> database_for_descriptor_set =
@@ -1011,6 +1013,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
   }
 
   if (proto_path_.empty()) {
+      //待定
     // If there are no --proto_path flags, then just look in the specified
     // --descriptor_set_in files.  But first, verify that the input files are
     // there.
@@ -1022,6 +1025,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
     descriptor_pool.reset(new DescriptorPool(descriptor_set_in_database.get(),
                                              error_collector.get()));
   } else {
+      //进度 default_delete   //进度，先学习一下模板
     disk_source_tree.reset(new DiskSourceTree());
     if (!InitializeDiskSourceTree(disk_source_tree.get(),
                                   descriptor_set_in_database.get())) {
@@ -1310,7 +1314,7 @@ bool CommandLineInterface::ParseInputFiles(
   descriptor_pool->ClearUnusedImportTrackFiles();
   return result;
 }
-
+//先不管
 void CommandLineInterface::Clear() {
   // Clear all members that are set by Run().  Note that we must not clear
   // members which are set by other methods before Run() is called.
@@ -1437,13 +1441,15 @@ bool CommandLineInterface::ExpandArgumentFile(
   }
   return true;
 }
-
+//ok
 CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
     int argc, const char* const argv[]) {
   executable_name_ = argv[0];
 
   std::vector<std::string> arguments;
+
   for (int i = 1; i < argc; ++i) {
+    //待定
     if (argv[i][0] == '@') {
       if (!ExpandArgumentFile(argv[i] + 1, &arguments)) {
         std::cerr << "Failed to open argument file: " << (argv[i] + 1)
@@ -1467,6 +1473,9 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
 
     if (ParseArgument(arguments[i].c_str(), &name, &value)) {
       // Returned true => Use the next argument as the flag value.
+        //返回true代表下一个参数是value
+        //如果i + 1 == arguments.size()，说明已经取完参数了，没有下一个，报错
+        //如果arguments[i + 1][0] == '-'，说明下一个不是value，报错
       if (i + 1 == arguments.size() || arguments[i + 1][0] == '-') {
         std::cerr << "Missing value for flag: " << name << std::endl;
         if (name == "--decode") {
@@ -1475,16 +1484,17 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
         }
         return PARSE_ARGUMENT_FAIL;
       } else {
+          //取下一个作为value
         ++i;
         value = arguments[i];
       }
     }
-
+    //翻译name和value
     ParseArgumentStatus status = InterpretArgument(name, value);
     if (status != PARSE_ARGUMENT_DONE_AND_CONTINUE) return status;
   }
-
   // Make sure each plugin option has a matching plugin output.
+  //待定
   bool foundUnknownPluginOption = false;
   for (std::map<std::string, std::string>::const_iterator i =
            plugin_parameters_.begin();
@@ -1592,7 +1602,7 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
 
   return PARSE_ARGUMENT_DONE_AND_CONTINUE;
 }
-
+//ok
 bool CommandLineInterface::ParseArgument(const char* arg, std::string* name,
                                          std::string* value) {
   bool parsed_value = false;
@@ -1652,7 +1662,7 @@ bool CommandLineInterface::ParseArgument(const char* arg, std::string* name,
   // Next argument is the flag value.
   return true;
 }
-
+//ok
 CommandLineInterface::ParseArgumentStatus
 CommandLineInterface::InterpretArgument(const std::string& name,
                                         const std::string& value) {
@@ -1670,6 +1680,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       return PARSE_ARGUMENT_FAIL;
     }
 
+    //ok wildcards待定，主要作用是把value填到input_files_
 #if defined(_WIN32)
     // On Windows, the shell (typically cmd.exe) does not expand wildcards in
     // file names (e.g. foo\*.proto), so we do it ourselves.
@@ -1695,11 +1706,12 @@ CommandLineInterface::InterpretArgument(const std::string& name,
     // Bash) expands wildcards.
     input_files_.push_back(value);
 #endif  // _WIN32
-
+    //ok  获取依赖的.proto文件，填入proto_path_
   } else if (name == "-I" || name == "--proto_path") {
     // Java's -classpath (and some other languages) delimits path components
     // with colons.  Let's accept that syntax too just to make things more
     // intuitive.
+      //理解意思就好，暂不要深入
     std::vector<std::string> parts = Split(
         value, CommandLineInterface::kPathSeparator,
         true);
@@ -1724,7 +1736,6 @@ CommandLineInterface::InterpretArgument(const std::string& name,
             << std::endl;
         return PARSE_ARGUMENT_FAIL;
       }
-
       // Make sure disk path exists, warn otherwise.
       if (access(disk_path.c_str(), F_OK) < 0) {
         // Try the original path; it may have just happened to have a '=' in it.
@@ -1948,6 +1959,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
         FindOrNull(generators_by_flag_name_, name);
     if (generator_info == NULL &&
         (plugin_prefix_.empty() || !HasSuffixString(name, "_out"))) {
+        //待定
       // Check if it's a generator option flag.
       generator_info = FindOrNull(generators_by_option_name_, name);
       if (generator_info != NULL) {
@@ -1982,6 +1994,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       if (generator_info == NULL) {
         directive.generator = NULL;
       } else {
+          //这里获取到生成器
         directive.generator = generator_info->generator;
       }
 
@@ -1990,6 +2003,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       // Windows-style absolute path.
       std::string::size_type colon_pos = value.find_first_of(':');
       if (colon_pos == std::string::npos || IsWindowsAbsolutePath(value)) {
+          //这里获取到生成路径
         directive.output_location = value;
       } else {
         directive.parameter = value.substr(0, colon_pos);
@@ -2002,7 +2016,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
 
   return PARSE_ARGUMENT_DONE_AND_CONTINUE;
 }
-
+//ok
 void CommandLineInterface::PrintHelpText() {
   // Sorry for indentation here; line wrapping would be uglier.
   std::cout << "Usage: " << executable_name_ << " [OPTION] PROTO_FILES";

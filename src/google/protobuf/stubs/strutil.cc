@@ -208,7 +208,7 @@ static inline void SplitStringToIteratorUsing(StringPiece full,
     begin_index = full.find_first_not_of(delim, end_index);
   }
 }
-
+//delim为什么不传引用？
 void SplitStringUsing(StringPiece full, const char *delim,
                       std::vector<std::string> *result) {
   std::back_insert_iterator<std::vector<std::string> > it(*result);

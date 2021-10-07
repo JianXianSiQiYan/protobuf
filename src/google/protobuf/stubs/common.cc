@@ -1,3 +1,4 @@
+//ok
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -67,7 +68,7 @@ namespace google {
 namespace protobuf {
 
 namespace internal {
-
+//ok
 void VerifyVersion(int headerVersion,
                    int minLibraryVersion,
                    const char* filename) {
@@ -95,7 +96,7 @@ void VerifyVersion(int headerVersion,
       << filename << "\".)";
   }
 }
-
+//ok
 std::string VersionString(int version) {
   int major = version / 1000000;
   int minor = (version / 1000) % 1000;
@@ -161,6 +162,7 @@ inline void DefaultLogHandler(LogLevel level, const char* filename, int line,
 }
 
 #else
+//ok
 void DefaultLogHandler(LogLevel level, const char* filename, int line,
                        const std::string& message) {
   if (level < GOOGLE_PROTOBUF_MIN_LOG_LEVEL) {
@@ -175,13 +177,14 @@ void DefaultLogHandler(LogLevel level, const char* filename, int line,
   fflush(stderr);  // Needed on MSVC.
 }
 #endif
-
+//ok
 void NullLogHandler(LogLevel /* level */, const char* /* filename */,
                     int /* line */, const std::string& /* message */) {
   // Nothing.
 }
 
 static LogHandler* log_handler_ = &DefaultLogHandler;
+//这里实在是搞不懂了
 static std::atomic<int> log_silencer_count_ = ATOMIC_VAR_INIT(0);
 
 LogMessage& LogMessage::operator<<(const std::string& value) {
@@ -193,17 +196,17 @@ LogMessage& LogMessage::operator<<(const char* value) {
   message_ += value;
   return *this;
 }
-
+//待定
 LogMessage& LogMessage::operator<<(const StringPiece& value) {
   message_ += value.ToString();
   return *this;
 }
-
+//待定
 LogMessage& LogMessage::operator<<(const util::Status& status) {
   message_ += status.ToString();
   return *this;
 }
-
+//待定
 LogMessage& LogMessage::operator<<(const uint128& value) {
   std::ostringstream str;
   str << value;
@@ -214,12 +217,12 @@ LogMessage& LogMessage::operator<<(const uint128& value) {
 LogMessage& LogMessage::operator<<(char value) {
   return *this << StringPiece(&value, 1);
 }
-
+//待定
 LogMessage& LogMessage::operator<<(void* value) {
   StrAppend(&message_, strings::Hex(reinterpret_cast<uintptr_t>(value)));
   return *this;
 }
-
+//待定
 #undef DECLARE_STREAM_OPERATOR
 #define DECLARE_STREAM_OPERATOR(TYPE)              \
   LogMessage& LogMessage::operator<<(TYPE value) { \
@@ -236,10 +239,14 @@ DECLARE_STREAM_OPERATOR(long long)           // NOLINT(runtime/int)
 DECLARE_STREAM_OPERATOR(unsigned long long)  // NOLINT(runtime/int)
 #undef DECLARE_STREAM_OPERATOR
 
+//ok
 LogMessage::LogMessage(LogLevel level, const char* filename, int line)
   : level_(level), filename_(filename), line_(line) {}
+
+//ok
 LogMessage::~LogMessage() {}
 
+//ok 主要效果是调用log_handler_
 void LogMessage::Finish() {
   bool suppress = false;
 
@@ -253,19 +260,21 @@ void LogMessage::Finish() {
 
   if (level_ == LOGLEVEL_FATAL) {
 #if PROTOBUF_USE_EXCEPTIONS
+    //待定
     throw FatalException(filename_, line_, message_);
 #else
+    //这里不懂
     abort();
 #endif
   }
 }
-
+//ok
 void LogFinisher::operator=(LogMessage& other) {
   other.Finish();
 }
 
 }  // namespace internal
-
+//ok
 LogHandler* SetLogHandler(LogHandler* new_func) {
   LogHandler* old = internal::log_handler_;
   if (old == &internal::NullLogHandler) {
@@ -289,11 +298,11 @@ LogSilencer::~LogSilencer() {
 
 // ===================================================================
 // emulates google3/base/callback.cc
-
+//待定
 Closure::~Closure() {}
-
+//待定
 namespace internal { FunctionClosure0::~FunctionClosure0() {} }
-
+//待定
 void DoNothing() {}
 
 // ===================================================================
@@ -302,6 +311,7 @@ void DoNothing() {}
 // TODO(xiaofeng): PROTOBUF_LITTLE_ENDIAN is unfortunately defined in
 // google/protobuf/io/coded_stream.h and therefore can not be used here.
 // Maybe move that macro definition here in the future.
+//待定
 uint32 ghtonl(uint32 x) {
   union {
     uint32 result;
@@ -313,7 +323,7 @@ uint32 ghtonl(uint32 x) {
   result_array[3] = static_cast<uint8>(x & 0xFF);
   return result;
 }
-
+//待定
 #if PROTOBUF_USE_EXCEPTIONS
 FatalException::~FatalException() throw() {}
 

@@ -149,6 +149,7 @@ bool StringOutputStream::Next(void** data, int* size) {
     // without a memory allocation this way.
     new_size = target_->capacity();
   } else {
+  //这里是等于的情况
     // Size has reached capacity, try to double it.
     new_size = old_size * 2;
   }
@@ -405,6 +406,7 @@ void CopyingOutputStreamAdaptor::FreeBuffer() {
 
 // ===================================================================
 
+//ok
 LimitingInputStream::LimitingInputStream(ZeroCopyInputStream* input,
                                          int64_t limit)
     : input_(input), limit_(limit) {
@@ -416,6 +418,7 @@ LimitingInputStream::~LimitingInputStream() {
   if (limit_ < 0) input_->BackUp(-limit_);
 }
 
+//ok
 bool LimitingInputStream::Next(const void** data, int* size) {
   if (limit_ <= 0) return false;
   if (!input_->Next(data, size)) return false;
@@ -428,6 +431,7 @@ bool LimitingInputStream::Next(const void** data, int* size) {
   return true;
 }
 
+//ok
 void LimitingInputStream::BackUp(int count) {
   if (limit_ < 0) {
     input_->BackUp(count - limit_);
@@ -438,6 +442,7 @@ void LimitingInputStream::BackUp(int count) {
   }
 }
 
+//ok
 bool LimitingInputStream::Skip(int count) {
   if (count > limit_) {
     if (limit_ < 0) return false;
@@ -450,7 +455,7 @@ bool LimitingInputStream::Skip(int count) {
     return true;
   }
 }
-
+//ok
 int64_t LimitingInputStream::ByteCount() const {
   if (limit_ < 0) {
     return input_->ByteCount() + limit_ - prior_bytes_read_;

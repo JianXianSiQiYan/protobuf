@@ -360,7 +360,7 @@ wstring testonly_utf8_to_winpath(const char* path) {
   wstring wpath;
   return as_windows_path(path, &wpath) ? wpath : wstring();
 }
-
+//待定 高级用法，先不管
 ExpandWildcardsResult ExpandWildcards(
     const string& path, std::function<void(const string&)> consume) {
   if (path.find_first_of("*?") == string::npos) {

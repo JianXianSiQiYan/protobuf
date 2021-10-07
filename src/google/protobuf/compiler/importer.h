@@ -213,6 +213,7 @@ class PROTOBUF_EXPORT MultiFileErrorCollector {
 // Used by the default implementation of Importer to resolve import statements
 // Most users will probably want to use the DiskSourceTree implementation,
 // below.
+//½ø¶È
 class PROTOBUF_EXPORT SourceTree {
  public:
   inline SourceTree() {}

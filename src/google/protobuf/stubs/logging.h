@@ -1,3 +1,4 @@
+//ok
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -69,7 +70,7 @@ class uint128;
 namespace internal {
 
 class LogFinisher;
-
+//ok
 class PROTOBUF_EXPORT LogMessage {
  public:
   LogMessage(LogLevel level, const char* filename, int line);
@@ -102,16 +103,16 @@ class PROTOBUF_EXPORT LogMessage {
 
 // Used to make the entire "LOG(BLAH) << etc." expression have a void return
 // type and print a newline after each message.
+//ok
 class PROTOBUF_EXPORT LogFinisher {
  public:
   void operator=(LogMessage& other);
 };
-
+//ok
 template<typename T>
 bool IsOk(T status) { return status.ok(); }
 template<>
 inline bool IsOk(bool status) { return status; }
-
 }  // namespace internal
 
 // Undef everything in case we're being mixed with some other Google library
@@ -157,7 +158,7 @@ inline bool IsOk(bool status) { return status; }
 #define GOOGLE_CHECK_LE(A, B) GOOGLE_CHECK((A) <= (B))
 #define GOOGLE_CHECK_GT(A, B) GOOGLE_CHECK((A) >  (B))
 #define GOOGLE_CHECK_GE(A, B) GOOGLE_CHECK((A) >= (B))
-
+//ok
 namespace internal {
 template<typename T>
 T* CheckNotNull(const char* /* file */, int /* line */,
@@ -216,6 +217,7 @@ typedef void LogHandler(LogLevel level, const char* filename, int line,
 // have some code that tends to trigger them frequently and you know
 // the warnings are not important to you), use the LogSilencer class
 // below.
+//ok
 PROTOBUF_EXPORT LogHandler* SetLogHandler(LogHandler* new_func);
 
 // Create a LogSilencer if you want to temporarily suppress all log

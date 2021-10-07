@@ -100,7 +100,7 @@ int ProtobufMain(int argc, char* argv[]) {
   js::Generator js_generator;
   cli.RegisterGenerator("--js_out", "--js_opt", &js_generator,
                         "Generate JavaScript source.");
-
+  //进度，前面都不知道是什么来的，先往下看
   return cli.Run(argc, argv);
 }
 

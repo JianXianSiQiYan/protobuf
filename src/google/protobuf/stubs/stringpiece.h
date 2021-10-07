@@ -39,7 +39,8 @@
 // copies and strlen() calls.
 //
 // Prefer passing StringPieces by value:
-//   void MyFunction(StringPiece arg);
+// //推荐用值传递
+//   void MyFunction(StringPiece arg);  
 // If circumstances require, you may also pass by const reference:
 //   void MyFunction(const StringPiece& arg);  // not preferred
 // Both of these have the same lifetime semantics.  Passing by value
@@ -57,6 +58,7 @@
 //   string str = obj.MethodReturningString();  // str owns its contents
 //   StringPiece sp(str);  // GOOD, because str outlives sp
 //
+// 不推荐作为return value或者类成员
 // StringPiece is sometimes a poor choice for a return value and usually a poor
 // choice for a data member.  If you do use a StringPiece this way, it is your
 // responsibility to ensure that the object pointed to by the StringPiece
@@ -179,6 +181,7 @@ class PROTOBUF_EXPORT StringPiece {
   const char* ptr_;
   size_type length_;
 
+//为什么不是size_t的最大值？
   static constexpr size_type kMaxSize =
       (std::numeric_limits<difference_type>::max)();
 

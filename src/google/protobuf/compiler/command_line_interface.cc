@@ -963,6 +963,7 @@ PopulateSingleSimpleDescriptorDatabase(const std::string& descriptor_set_name);
 
 int CommandLineInterface::Run(int argc, const char* const argv[]) {
   Clear();
+  //进度
   switch (ParseArguments(argc, argv)) {
     case PARSE_ARGUMENT_DONE_AND_EXIT:
       return 0;
@@ -1310,7 +1311,7 @@ bool CommandLineInterface::ParseInputFiles(
   descriptor_pool->ClearUnusedImportTrackFiles();
   return result;
 }
-
+//先不管
 void CommandLineInterface::Clear() {
   // Clear all members that are set by Run().  Note that we must not clear
   // members which are set by other methods before Run() is called.
@@ -1443,6 +1444,7 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
   executable_name_ = argv[0];
 
   std::vector<std::string> arguments;
+  //待定
   for (int i = 1; i < argc; ++i) {
     if (argv[i][0] == '@') {
       if (!ExpandArgumentFile(argv[i] + 1, &arguments)) {
@@ -1592,7 +1594,7 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
 
   return PARSE_ARGUMENT_DONE_AND_CONTINUE;
 }
-
+//ok
 bool CommandLineInterface::ParseArgument(const char* arg, std::string* name,
                                          std::string* value) {
   bool parsed_value = false;
@@ -1697,6 +1699,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
 #endif  // _WIN32
 
   } else if (name == "-I" || name == "--proto_path") {
+    //依赖的.proto文件
     // Java's -classpath (and some other languages) delimits path components
     // with colons.  Let's accept that syntax too just to make things more
     // intuitive.
@@ -2002,7 +2005,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
 
   return PARSE_ARGUMENT_DONE_AND_CONTINUE;
 }
-
+//ok
 void CommandLineInterface::PrintHelpText() {
   // Sorry for indentation here; line wrapping would be uglier.
   std::cout << "Usage: " << executable_name_ << " [OPTION] PROTO_FILES";

@@ -134,11 +134,13 @@ bool FileInputStream::CopyingFileInputStream::Close() {
   return true;
 }
 
+//ok
 int FileInputStream::CopyingFileInputStream::Read(void* buffer, int size) {
   GOOGLE_CHECK(!is_closed_);
 
   int result;
   do {
+  //window编程很难搞啊，强行理解，从file_中读取size bytes到buffer中，应该是这样
     result = read(file_, buffer, size);
   } while (result < 0 && errno == EINTR);
 

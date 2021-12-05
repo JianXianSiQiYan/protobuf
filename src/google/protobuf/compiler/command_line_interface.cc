@@ -1447,7 +1447,11 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
   executable_name_ = argv[0];
 
   std::vector<std::string> arguments;
+<<<<<<< HEAD
 
+=======
+  //待定
+>>>>>>> 8e77c67400880d84cde848cab104e14cf92beef2
   for (int i = 1; i < argc; ++i) {
     //待定
     if (argv[i][0] == '@') {
@@ -1708,6 +1712,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
 #endif  // _WIN32
     //ok  获取依赖的.proto文件，填入proto_path_
   } else if (name == "-I" || name == "--proto_path") {
+    //依赖的.proto文件
     // Java's -classpath (and some other languages) delimits path components
     // with colons.  Let's accept that syntax too just to make things more
     // intuitive.

@@ -160,7 +160,6 @@ class PROTOBUF_EXPORT StringOutputStream : public ZeroCopyOutputStream {
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(StringOutputStream);
 };
 
-//进度
 // Note:  There is no StringInputStream.  Instead, just create an
 // ArrayInputStream as follows:
 //   ArrayInputStream input(str.data(), str.size());
@@ -207,7 +206,6 @@ class PROTOBUF_EXPORT CopyingInputStream {
 // respectively.
 class PROTOBUF_EXPORT CopyingInputStreamAdaptor : public ZeroCopyInputStream {
  public:
-     //进度
   // Creates a stream that reads from the given CopyingInputStream.
   // If a block_size is given, it specifies the number of bytes that
   // should be read and returned with each call to Next().  Otherwise,
@@ -283,7 +281,6 @@ class PROTOBUF_EXPORT CopyingOutputStream {
   // if successful, false on a write error.
   virtual bool Write(const void* buffer, int size) = 0;
 };
-//进度
 // A ZeroCopyOutputStream which writes to a CopyingOutputStream.  This is
 // useful for implementing ZeroCopyOutputStreams that write to traditional
 // streams.  Note that this class is not really zero-copy.

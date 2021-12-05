@@ -226,8 +226,8 @@ bool CopyingInputStreamAdaptor::Next(const void** data, int* size) {
     backup_bytes_ = 0;
     return true;
   }
-
   // Read new data into the buffer.
+  //从CopyingInputStream中读取buffer_size_到buffer_.get()
   buffer_used_ = copying_stream_->Read(buffer_.get(), buffer_size_);
   if (buffer_used_ <= 0) {
     // EOF or read error.  We don't need the buffer anymore.
@@ -282,7 +282,7 @@ bool CopyingInputStreamAdaptor::Skip(int count) {
 int64_t CopyingInputStreamAdaptor::ByteCount() const {
   return position_ - backup_bytes_;
 }
-
+//ok
 void CopyingInputStreamAdaptor::AllocateBufferIfNeeded() {
   if (buffer_.get() == NULL) {
     buffer_.reset(new uint8_t[buffer_size_]);

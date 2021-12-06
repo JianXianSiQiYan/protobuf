@@ -108,6 +108,7 @@ int ProtobufMain(int argc, char* argv[]) {
 }  // namespace protobuf
 }  // namespace google
 //千里之行，始于足下。
+//2021年12月6日，继续前行。
 int main(int argc, char* argv[]) {
     //命令行以空格分割出字符串，argc：有多少个字符串 argv：字符串
   return PROTOBUF_NAMESPACE_ID::compiler::ProtobufMain(argc, argv);

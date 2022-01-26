@@ -1,3 +1,4 @@
+//ok
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -56,6 +57,7 @@ static const int kDefaultBlockSize = 8192;
 // ===================================================================
 
 ArrayInputStream::ArrayInputStream(const void* data, int size, int block_size)
+    //data作为数组进行解析
     : data_(reinterpret_cast<const uint8_t*>(data)),
       size_(size),
       block_size_(block_size > 0 ? block_size : size),
@@ -76,6 +78,7 @@ bool ArrayInputStream::Next(const void** data, int* size) {
   }
 }
 
+//ok 将position_往前推count
 void ArrayInputStream::BackUp(int count) {
   GOOGLE_CHECK_GT(last_returned_size_, 0)
       << "BackUp() can only be called after a successful Next().";
@@ -89,6 +92,7 @@ bool ArrayInputStream::Skip(int count) {
   GOOGLE_CHECK_GE(count, 0);
   last_returned_size_ = 0;  // Don't let caller back up.
   if (count > size_ - position_) {
+  //skip不成功，也把position_推到了最后
     position_ = size_;
     return false;
   } else {
@@ -137,7 +141,7 @@ int64_t ArrayOutputStream::ByteCount() const { return position_; }
 // ===================================================================
 
 StringOutputStream::StringOutputStream(std::string* target) : target_(target) {}
-
+//ok 获取可用的内存指针和对应的内存大小
 bool StringOutputStream::Next(void** data, int* size) {
   GOOGLE_CHECK(target_ != NULL);
   size_t old_size = target_->size();
@@ -147,7 +151,7 @@ bool StringOutputStream::Next(void** data, int* size) {
   if (old_size < target_->capacity()) {
     // Resize the string to match its capacity, since we can get away
     // without a memory allocation this way.
-    new_size = target_->capacity();
+    new_size = target_->capacity(); 
   } else {
   //这里是等于的情况
     // Size has reached capacity, try to double it.
@@ -165,21 +169,21 @@ bool StringOutputStream::Next(void** data, int* size) {
   *size = target_->size() - old_size;
   return true;
 }
-
+//ok
 void StringOutputStream::BackUp(int count) {
   GOOGLE_CHECK_GE(count, 0);
   GOOGLE_CHECK(target_ != NULL);
   GOOGLE_CHECK_LE(static_cast<size_t>(count), target_->size());
   target_->resize(target_->size() - count);
 }
-
+//ok
 int64_t StringOutputStream::ByteCount() const {
   GOOGLE_CHECK(target_ != NULL);
   return target_->size();
 }
 
 // ===================================================================
-
+//ok 忽略count bytes的数据
 int CopyingInputStream::Skip(int count) {
   char junk[4096];
   int skipped = 0;
@@ -194,7 +198,7 @@ int CopyingInputStream::Skip(int count) {
   }
   return skipped;
 }
-
+//ok
 CopyingInputStreamAdaptor::CopyingInputStreamAdaptor(
     CopyingInputStream* copying_stream, int block_size)
     : copying_stream_(copying_stream),
@@ -204,13 +208,13 @@ CopyingInputStreamAdaptor::CopyingInputStreamAdaptor(
       buffer_size_(block_size > 0 ? block_size : kDefaultBlockSize),
       buffer_used_(0),
       backup_bytes_(0) {}
-
+//ok
 CopyingInputStreamAdaptor::~CopyingInputStreamAdaptor() {
   if (owns_copying_stream_) {
     delete copying_stream_;
   }
 }
-
+//ok 从CopyingInputStream中读取buffer_size_到buffer_.get()，再把data指向buffer_.get()
 bool CopyingInputStreamAdaptor::Next(const void** data, int* size) {
   if (failed_) {
     // Already failed on a previous read.
@@ -218,7 +222,7 @@ bool CopyingInputStreamAdaptor::Next(const void** data, int* size) {
   }
 
   AllocateBufferIfNeeded();
-
+  //把backup bytes吐出来
   if (backup_bytes_ > 0) {
     // We have data left over from a previous BackUp(), so just return that.
     *data = buffer_.get() + buffer_used_ - backup_bytes_;
@@ -244,7 +248,7 @@ bool CopyingInputStreamAdaptor::Next(const void** data, int* size) {
   *data = buffer_.get();
   return true;
 }
-
+//ok
 void CopyingInputStreamAdaptor::BackUp(int count) {
   GOOGLE_CHECK(backup_bytes_ == 0 && buffer_.get() != NULL)
       << " BackUp() can only be called after Next().";
@@ -255,7 +259,7 @@ void CopyingInputStreamAdaptor::BackUp(int count) {
 
   backup_bytes_ = count;
 }
-
+//ok 忽略count bytes的数据
 bool CopyingInputStreamAdaptor::Skip(int count) {
   GOOGLE_CHECK_GE(count, 0);
 
@@ -278,25 +282,26 @@ bool CopyingInputStreamAdaptor::Skip(int count) {
   position_ += skipped;
   return skipped == count;
 }
-
+//ok
 int64_t CopyingInputStreamAdaptor::ByteCount() const {
   return position_ - backup_bytes_;
 }
-//ok
+//ok 重设buffer_
 void CopyingInputStreamAdaptor::AllocateBufferIfNeeded() {
   if (buffer_.get() == NULL) {
     buffer_.reset(new uint8_t[buffer_size_]);
   }
 }
-
+//ok 重置buffer_
 void CopyingInputStreamAdaptor::FreeBuffer() {
   GOOGLE_CHECK_EQ(backup_bytes_, 0);
   buffer_used_ = 0;
+  //reset之后buffer_.get()就是空指针了
   buffer_.reset();
 }
 
 // ===================================================================
-
+//ok
 CopyingOutputStreamAdaptor::CopyingOutputStreamAdaptor(
     CopyingOutputStream* copying_stream, int block_size)
     : copying_stream_(copying_stream),
@@ -305,29 +310,32 @@ CopyingOutputStreamAdaptor::CopyingOutputStreamAdaptor(
       position_(0),
       buffer_size_(block_size > 0 ? block_size : kDefaultBlockSize),
       buffer_used_(0) {}
-
+//ok
 CopyingOutputStreamAdaptor::~CopyingOutputStreamAdaptor() {
   WriteBuffer();
   if (owns_copying_stream_) {
     delete copying_stream_;
   }
 }
-
+//ok
 bool CopyingOutputStreamAdaptor::Flush() { return WriteBuffer(); }
-
+//ok
 bool CopyingOutputStreamAdaptor::Next(void** data, int* size) {
+  //一旦存在backup，不执行WriteBuffer
+  //否则，将暂存区的数据写入文件
   if (buffer_used_ == buffer_size_) {
     if (!WriteBuffer()) return false;
   }
 
   AllocateBufferIfNeeded();
-
+  //一旦存在backup，把backup大小的暂存区给出去
+  //否则此时buffer_used_一定为0，相当于把buffer_size_大小的暂存区给出去
   *data = buffer_.get() + buffer_used_;
   *size = buffer_size_ - buffer_used_;
   buffer_used_ = buffer_size_;
   return true;
 }
-
+//ok backup的效果在Next中体现
 void CopyingOutputStreamAdaptor::BackUp(int count) {
   GOOGLE_CHECK_GE(count, 0);
   GOOGLE_CHECK_EQ(buffer_used_, buffer_size_)
@@ -338,13 +346,15 @@ void CopyingOutputStreamAdaptor::BackUp(int count) {
 
   buffer_used_ -= count;
 }
-
+//ok
 int64_t CopyingOutputStreamAdaptor::ByteCount() const {
   return position_ + buffer_used_;
 }
-
+//data：指向将要写的内容，size：将要写的大小
+//ok 将size大小data中的数据写入文件
 bool CopyingOutputStreamAdaptor::WriteAliasedRaw(const void* data, int size) {
   if (size >= buffer_size_) {
+  //如果size大于buffer_size_，无法buffer，直接将数据写入文件
     if (!Flush() || !copying_stream_->Write(data, size)) {
       return false;
     }
@@ -373,7 +383,7 @@ bool CopyingOutputStreamAdaptor::WriteAliasedRaw(const void* data, int size) {
   return true;
 }
 
-
+//ok 把buffer_中暂存的数据写到copying_stream_中
 bool CopyingOutputStreamAdaptor::WriteBuffer() {
   if (failed_) {
     // Already failed on a previous write.
@@ -392,13 +402,13 @@ bool CopyingOutputStreamAdaptor::WriteBuffer() {
     return false;
   }
 }
-
+//ok 为buffer_分配内存
 void CopyingOutputStreamAdaptor::AllocateBufferIfNeeded() {
   if (buffer_ == NULL) {
     buffer_.reset(new uint8_t[buffer_size_]);
   }
 }
-
+//ok 解放buffer
 void CopyingOutputStreamAdaptor::FreeBuffer() {
   buffer_used_ = 0;
   buffer_.reset();
@@ -412,7 +422,7 @@ LimitingInputStream::LimitingInputStream(ZeroCopyInputStream* input,
     : input_(input), limit_(limit) {
   prior_bytes_read_ = input_->ByteCount();
 }
-
+//ok
 LimitingInputStream::~LimitingInputStream() {
   // If we overshot the limit, back up.
   if (limit_ < 0) input_->BackUp(-limit_);
@@ -434,6 +444,7 @@ bool LimitingInputStream::Next(const void** data, int* size) {
 //ok
 void LimitingInputStream::BackUp(int count) {
   if (limit_ < 0) {
+    //这里backup了count + (-limit)，所以后面才有limit_ = count;
     input_->BackUp(count - limit_);
     limit_ = count;
   } else {

@@ -89,6 +89,7 @@
 //   cout << "Text is: " << text << endl;
 //   delete [] text;
 //
+// 这段看不明白
 // For those who are interested, varint encoding is defined as follows:
 //
 // The encoding operates on unsigned integers of up to 64 bits in length.

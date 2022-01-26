@@ -1,3 +1,4 @@
+//ok
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -74,6 +75,7 @@ class PROTOBUF_EXPORT ArrayInputStream : public ZeroCopyInputStream {
   // first call to Next() returns the entire array.  block_size is mainly
   // useful for testing; in production you would probably never want to set
   // it.
+
   ArrayInputStream(const void* data, int size, int block_size = -1);
   ~ArrayInputStream() override = default;
 
@@ -90,6 +92,7 @@ class PROTOBUF_EXPORT ArrayInputStream : public ZeroCopyInputStream {
   const int block_size_;     // How many bytes to return at a time.
 
   int position_;
+  //上一次Next()读到的byte数
   int last_returned_size_;  // How many bytes we returned last time Next()
                             // was called (used for error checking only).
 
@@ -99,6 +102,7 @@ class PROTOBUF_EXPORT ArrayInputStream : public ZeroCopyInputStream {
 // ===================================================================
 // A ZeroCopyOutputStream backed by an in-memory array of bytes.
 //ok
+//好像跟ArrayInputStream的实现一模一样
 class PROTOBUF_EXPORT ArrayOutputStream : public ZeroCopyOutputStream {
  public:
   // Create an OutputStream that writes to the bytes pointed to by "data".
@@ -131,7 +135,7 @@ class PROTOBUF_EXPORT ArrayOutputStream : public ZeroCopyOutputStream {
 // ===================================================================
 
 // A ZeroCopyOutputStream which appends bytes to a string.
-//待定，不是很明白
+//ok
 class PROTOBUF_EXPORT StringOutputStream : public ZeroCopyOutputStream {
  public:
   // Create a StringOutputStream which appends bytes to the given string.
@@ -140,7 +144,6 @@ class PROTOBUF_EXPORT StringOutputStream : public ZeroCopyOutputStream {
   // stream. Either be sure there's no further usage, or (safest) destroy the
   // stream before using the contents.
   //
-  //这句话是看不懂了
   // Hint:  If you call target->reserve(n) before creating the stream,
   //   the first call to Next() will return at least n bytes of buffer
   //   space.
@@ -186,6 +189,7 @@ class PROTOBUF_EXPORT CopyingInputStream {
   // bytes read.  Read() waits until at least one byte is available, or
   // returns zero if no bytes will ever become available (EOF), or -1 if a
   // permanent read error occurred.
+  //ok 读取（在哪里？）size个bytes数据到buffer
   virtual int Read(void* buffer, int size) = 0;
 
   // Skips the next "count" bytes of input.  Returns the number of bytes
@@ -204,6 +208,7 @@ class PROTOBUF_EXPORT CopyingInputStream {
 // If you want to read from file descriptors or C++ istreams, this is
 // already implemented for you:  use FileInputStream or IstreamInputStream
 // respectively.
+//ok
 class PROTOBUF_EXPORT CopyingInputStreamAdaptor : public ZeroCopyInputStream {
  public:
   // Creates a stream that reads from the given CopyingInputStream.
@@ -233,9 +238,11 @@ class PROTOBUF_EXPORT CopyingInputStreamAdaptor : public ZeroCopyInputStream {
 
   // The underlying copying stream.
   CopyingInputStream* copying_stream_;
+  //用于判断析构函数是否delete copying_stream_
   bool owns_copying_stream_;
 
   // True if we have seen a permanent error from the underlying stream.
+  //置了true就没法恢复了
   bool failed_;
 
   // The current position of copying_stream_, relative to the point where
@@ -244,6 +251,8 @@ class PROTOBUF_EXPORT CopyingInputStreamAdaptor : public ZeroCopyInputStream {
 
   // Data is read into this buffer.  It may be NULL if no buffer is currently
   // in use.  Otherwise, it points to an array of size buffer_size_.
+  //unique_ptr 数组形式
+  //用于临时存储数据
   std::unique_ptr<uint8_t[]> buffer_;
   const int buffer_size_;
 
@@ -272,13 +281,14 @@ class PROTOBUF_EXPORT CopyingInputStreamAdaptor : public ZeroCopyInputStream {
 // CopyingOutputStream implementations should avoid buffering if possible.
 // CopyingOutputStreamAdaptor does its own buffering and will write data
 // in large blocks.
-//待定
+//ok
 class PROTOBUF_EXPORT CopyingOutputStream {
  public:
   virtual ~CopyingOutputStream() {}
 
   // Writes "size" bytes from the given buffer to the output.  Returns true
   // if successful, false on a write error.
+  //从将buffer中的size大小的数据写到输出器中
   virtual bool Write(const void* buffer, int size) = 0;
 };
 // A ZeroCopyOutputStream which writes to a CopyingOutputStream.  This is
@@ -288,6 +298,7 @@ class PROTOBUF_EXPORT CopyingOutputStream {
 // If you want to write to file descriptors or C++ ostreams, this is
 // already implemented for you:  use FileOutputStream or OstreamOutputStream
 // respectively.
+//ok
 class PROTOBUF_EXPORT CopyingOutputStreamAdaptor : public ZeroCopyOutputStream {
  public:
   // Creates a stream that writes to the given Unix file descriptor.
@@ -327,6 +338,7 @@ class PROTOBUF_EXPORT CopyingOutputStreamAdaptor : public ZeroCopyOutputStream {
   bool owns_copying_stream_;
 
   // True if we have seen a permanent error from the underlying stream.
+  //永久性错误，一旦出错不能恢复。
   bool failed_;
 
   // The current position of copying_stream_, relative to the point where
@@ -350,7 +362,7 @@ class PROTOBUF_EXPORT CopyingOutputStreamAdaptor : public ZeroCopyOutputStream {
 
 // A ZeroCopyInputStream which wraps some other stream and limits it to
 // a particular byte count.
-//待定，不是很理解
+//ok 最关键是增加了limit这个元素
 class PROTOBUF_EXPORT LimitingInputStream : public ZeroCopyInputStream {
  public:
   LimitingInputStream(ZeroCopyInputStream* input, int64_t limit);
@@ -396,12 +408,11 @@ inline char* mutable_string_data(std::string* s) {
   return &(*s)[0];
 }
 
-//这里哪里equivalent了？
 // as_string_data(s) is equivalent to
 //  ({ char* p = mutable_string_data(s); make_pair(p, p != NULL); })
 // Sometimes it's faster: in some scenarios p cannot be NULL, and then the
 // code can avoid that check.
-//待定
+//ok 这里的意思是p在某些场景不可能是NULL，可以不用校验
 inline std::pair<char*, bool> as_string_data(std::string* s) {
   char* p = mutable_string_data(s);
   return std::make_pair(p, true);

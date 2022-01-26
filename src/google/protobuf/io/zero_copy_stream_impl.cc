@@ -1,3 +1,4 @@
+//ok
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -70,6 +71,7 @@ using google::protobuf::io::win32::write;
 namespace {
 
 // EINTR sucks.
+//ok 关闭一个文件，但要排除EINTR错误
 int close_no_eintr(int fd) {
   int result;
   do {
@@ -81,12 +83,12 @@ int close_no_eintr(int fd) {
 }  // namespace
 
 // ===================================================================
-
+//ok
 FileInputStream::FileInputStream(int file_descriptor, int block_size)
     : copying_input_(file_descriptor), impl_(&copying_input_, block_size) {}
-
+    //ok
 bool FileInputStream::Close() { return copying_input_.Close(); }
-
+//ok
 bool FileInputStream::Next(const void** data, int* size) {
   return impl_.Next(data, size);
 }
@@ -96,7 +98,7 @@ void FileInputStream::BackUp(int count) { impl_.BackUp(count); }
 bool FileInputStream::Skip(int count) { return impl_.Skip(count); }
 
 int64_t FileInputStream::ByteCount() const { return impl_.ByteCount(); }
-
+//ok
 FileInputStream::CopyingFileInputStream::CopyingFileInputStream(
     int file_descriptor)
     : file_(file_descriptor),
@@ -110,7 +112,7 @@ FileInputStream::CopyingFileInputStream::CopyingFileInputStream(
   fcntl(file_, F_SETFL, flags);
 #endif
 }
-
+//ok 析构时执行关闭文件的动作
 FileInputStream::CopyingFileInputStream::~CopyingFileInputStream() {
   if (close_on_delete_) {
     if (!Close()) {
@@ -118,7 +120,7 @@ FileInputStream::CopyingFileInputStream::~CopyingFileInputStream() {
     }
   }
 }
-
+//ok 关闭文件
 bool FileInputStream::CopyingFileInputStream::Close() {
   GOOGLE_CHECK(!is_closed_);
 
@@ -134,13 +136,12 @@ bool FileInputStream::CopyingFileInputStream::Close() {
   return true;
 }
 
-//ok
+//ok 从file_所代表的文件中读取size bytes的数据到buffer中
 int FileInputStream::CopyingFileInputStream::Read(void* buffer, int size) {
   GOOGLE_CHECK(!is_closed_);
 
   int result;
   do {
-  //window编程很难搞啊，强行理解，从file_中读取size bytes到buffer中，应该是这样
     result = read(file_, buffer, size);
   } while (result < 0 && errno == EINTR);
 
@@ -151,10 +152,10 @@ int FileInputStream::CopyingFileInputStream::Read(void* buffer, int size) {
 
   return result;
 }
-
+//ok 剔除文件的count bytes数据
 int FileInputStream::CopyingFileInputStream::Skip(int count) {
   GOOGLE_CHECK(!is_closed_);
-
+  //直接改变文件的当前偏移量
   if (!previous_seek_failed_ && lseek(file_, count, SEEK_CUR) != (off_t)-1) {
     // Seek succeeded.
     return count;
@@ -171,25 +172,25 @@ int FileInputStream::CopyingFileInputStream::Skip(int count) {
 }
 
 // ===================================================================
-
+//ok
 FileOutputStream::FileOutputStream(int file_descriptor, int /*block_size*/)
     : CopyingOutputStreamAdaptor(&copying_output_),
       copying_output_(file_descriptor) {}
-
+//ok
 bool FileOutputStream::Close() {
   bool flush_succeeded = Flush();
   return copying_output_.Close() && flush_succeeded;
 }
-
+//ok
 FileOutputStream::CopyingFileOutputStream::CopyingFileOutputStream(
     int file_descriptor)
     : file_(file_descriptor),
       close_on_delete_(false),
       is_closed_(false),
       errno_(0) {}
-
+//ok
 FileOutputStream::~FileOutputStream() { Flush(); }
-
+//ok
 FileOutputStream::CopyingFileOutputStream::~CopyingFileOutputStream() {
   if (close_on_delete_) {
     if (!Close()) {
@@ -197,12 +198,13 @@ FileOutputStream::CopyingFileOutputStream::~CopyingFileOutputStream() {
     }
   }
 }
-
+//ok
 bool FileOutputStream::CopyingFileOutputStream::Close() {
   GOOGLE_CHECK(!is_closed_);
 
   is_closed_ = true;
   if (close_no_eintr(file_) != 0) {
+  //下面这段话不理解
     // The docs on close() do not specify whether a file descriptor is still
     // open after close() fails with EIO.  However, the glibc source code
     // seems to indicate that it is not.
@@ -212,7 +214,7 @@ bool FileOutputStream::CopyingFileOutputStream::Close() {
 
   return true;
 }
-
+//ok 把buffer中的数据写到file_所代表的文件中
 bool FileOutputStream::CopyingFileOutputStream::Write(const void* buffer,
                                                       int size) {
   GOOGLE_CHECK(!is_closed_);
@@ -262,13 +264,14 @@ void IstreamInputStream::BackUp(int count) { impl_.BackUp(count); }
 bool IstreamInputStream::Skip(int count) { return impl_.Skip(count); }
 
 int64_t IstreamInputStream::ByteCount() const { return impl_.ByteCount(); }
-
+//ok
 IstreamInputStream::CopyingIstreamInputStream::CopyingIstreamInputStream(
     std::istream* input)
     : input_(input) {}
 
 IstreamInputStream::CopyingIstreamInputStream::~CopyingIstreamInputStream() {}
 
+//ok buffer：读取的数据保存的地方   size：请求读取的大小
 int IstreamInputStream::CopyingIstreamInputStream::Read(void* buffer,
                                                         int size) {
   input_->read(reinterpret_cast<char*>(buffer), size);
@@ -283,7 +286,7 @@ int IstreamInputStream::CopyingIstreamInputStream::Read(void* buffer,
 
 OstreamOutputStream::OstreamOutputStream(std::ostream* output, int block_size)
     : copying_output_(output), impl_(&copying_output_, block_size) {}
-
+//ok
 OstreamOutputStream::~OstreamOutputStream() { impl_.Flush(); }
 
 bool OstreamOutputStream::Next(void** data, int* size) {
@@ -293,17 +296,19 @@ bool OstreamOutputStream::Next(void** data, int* size) {
 void OstreamOutputStream::BackUp(int count) { impl_.BackUp(count); }
 
 int64_t OstreamOutputStream::ByteCount() const { return impl_.ByteCount(); }
-
+//ok
 OstreamOutputStream::CopyingOstreamOutputStream::CopyingOstreamOutputStream(
     std::ostream* output)
     : output_(output) {}
 
 OstreamOutputStream::CopyingOstreamOutputStream::~CopyingOstreamOutputStream() {
 }
-
+//ok
 bool OstreamOutputStream::CopyingOstreamOutputStream::Write(const void* buffer,
                                                             int size) {
+    //将buffer所指向的字符串复制出来并插入到缓冲区中，最多插入size个字符
   output_->write(reinterpret_cast<const char*>(buffer), size);
+  //检查流的状态是否正常，正常则返回true
   return output_->good();
 }
 

@@ -1447,11 +1447,7 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
   executable_name_ = argv[0];
 
   std::vector<std::string> arguments;
-<<<<<<< HEAD
-
-=======
   //´ý¶¨
->>>>>>> 8e77c67400880d84cde848cab104e14cf92beef2
   for (int i = 1; i < argc; ++i) {
     //´ý¶¨
     if (argv[i][0] == '@') {

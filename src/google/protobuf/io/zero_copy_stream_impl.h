@@ -1,3 +1,4 @@
+//ok
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -62,6 +63,7 @@ namespace io {
 // The latter will introduce an extra layer of buffering, harming performance.
 // Also, it's conceivable that FileInputStream could someday be enhanced
 // to use zero-copy file descriptors on OSs which support them.
+//ok
 class PROTOBUF_EXPORT FileInputStream : public ZeroCopyInputStream {
  public:
   // Creates a stream that reads from the given Unix file descriptor.
@@ -95,6 +97,7 @@ class PROTOBUF_EXPORT FileInputStream : public ZeroCopyInputStream {
   int64_t ByteCount() const override;
 
  private:
+ //ok
   class PROTOBUF_EXPORT CopyingFileInputStream : public CopyingInputStream {
    public:
     CopyingFileInputStream(int file_descriptor);
@@ -139,6 +142,7 @@ class PROTOBUF_EXPORT FileInputStream : public ZeroCopyInputStream {
 // harming performance.  Also, it's conceivable that FileOutputStream could
 // someday be enhanced to use zero-copy file descriptors on OSs which
 // support them.
+//ok
 class PROTOBUF_EXPORT FileOutputStream : public CopyingOutputStreamAdaptor {
  public:
   // Creates a stream that writes to the given Unix file descriptor.
@@ -203,6 +207,7 @@ class PROTOBUF_EXPORT FileOutputStream : public CopyingOutputStreamAdaptor {
 //
 // Note that for reading files (or anything represented by a file descriptor),
 // FileInputStream is more efficient.
+//ok
 class PROTOBUF_EXPORT IstreamInputStream : public ZeroCopyInputStream {
  public:
   // Creates a stream that reads from the given C++ istream.
@@ -218,6 +223,7 @@ class PROTOBUF_EXPORT IstreamInputStream : public ZeroCopyInputStream {
   int64_t ByteCount() const override;
 
  private:
+    //ok
   class PROTOBUF_EXPORT CopyingIstreamInputStream : public CopyingInputStream {
    public:
     CopyingIstreamInputStream(std::istream* input);
@@ -246,6 +252,7 @@ class PROTOBUF_EXPORT IstreamInputStream : public ZeroCopyInputStream {
 //
 // Note that for writing files (or anything represented by a file descriptor),
 // FileOutputStream is more efficient.
+//ok
 class PROTOBUF_EXPORT OstreamOutputStream : public ZeroCopyOutputStream {
  public:
   // Creates a stream that writes to the given C++ ostream.
@@ -261,6 +268,7 @@ class PROTOBUF_EXPORT OstreamOutputStream : public ZeroCopyOutputStream {
   int64_t ByteCount() const override;
 
  private:
+ //ok
   class PROTOBUF_EXPORT CopyingOstreamOutputStream
       : public CopyingOutputStream {
    public:
@@ -292,6 +300,7 @@ class PROTOBUF_EXPORT OstreamOutputStream : public ZeroCopyOutputStream {
 // ConcatenatingInputStream may do odd things.  It is suggested that you do
 // not use ConcatenatingInputStream on streams that might produce read errors
 // other than end-of-stream.
+//ºöÂÔ
 class PROTOBUF_EXPORT ConcatenatingInputStream : public ZeroCopyInputStream {
  public:
   // All streams passed in as well as the array itself must remain valid

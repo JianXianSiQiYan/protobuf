@@ -147,6 +147,7 @@ class PROTOBUF_EXPORT ZeroCopyInputStream {
   // * It is legal for the returned buffer to have zero size, as long
   //   as repeatedly calling Next() eventually yields a buffer with non-zero
   //   size.
+  //如果成功，*size为读到的数据大小，*data为指针，指向读取到的数据
   virtual bool Next(const void** data, int* size) = 0;
 
   // Backs up a number of bytes, so that the next call to Next() returns

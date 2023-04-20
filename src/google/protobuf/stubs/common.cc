@@ -260,7 +260,7 @@ void LogMessage::Finish() {
 
   if (level_ == LOGLEVEL_FATAL) {
 #if PROTOBUF_USE_EXCEPTIONS
-    //待定
+    //待定 throw之后整个程序应该退出了
     throw FatalException(filename_, line_, message_);
 #else
     //这里不懂

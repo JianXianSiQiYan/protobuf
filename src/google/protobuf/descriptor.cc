@@ -1872,7 +1872,8 @@ DescriptorPool::~DescriptorPool() {
 void DescriptorPool::InternalDontEnforceDependencies() {
   enforce_dependencies_ = false;
 }
-
+//ok
+//保存没有用到的import file的告警等级，true是error，false是warn
 void DescriptorPool::AddUnusedImportTrackFile(ConstStringParam file_name,
                                               bool is_error) {
   unused_import_track_files_[std::string(file_name)] = is_error;
@@ -1891,7 +1892,8 @@ bool DescriptorPool::InternalIsFileLoaded(ConstStringParam filename) const {
 
 namespace {
 
-
+//ok
+//获取EncodedDescriptorDatabase的唯一实例
 EncodedDescriptorDatabase* GeneratedDatabase() {
   static auto generated_database =
       internal::OnShutdownDelete(new EncodedDescriptorDatabase());
@@ -1957,9 +1959,10 @@ void DescriptorPool::InternalAddGeneratedFile(
 // TODO(kenton):  There's a lot of repeated code here, but I'm not sure if
 //   there's any good way to factor it out.  Think about this some time when
 //   there's nothing more important to do (read: never).
-
+//name：将要编译的文件名
 const FileDescriptor* DescriptorPool::FindFileByName(
     ConstStringParam name) const {
+    //mutex_ daiding
   MutexLockMaybe lock(mutex_);
   if (fallback_database_ != nullptr) {
     tables_->known_bad_symbols_.clear();
@@ -1971,6 +1974,7 @@ const FileDescriptor* DescriptorPool::FindFileByName(
     result = underlay_->FindFileByName(name);
     if (result != nullptr) return result;
   }
+  //jindu3
   if (TryFindFileInFallbackDatabase(name)) {
     result = tables_->FindFile(name);
     if (result != nullptr) return result;
@@ -2371,7 +2375,7 @@ EnumDescriptor::FindReservedRangeContainingNumber(int number) const {
 }
 
 // -------------------------------------------------------------------
-
+//name：将要编译的文件名
 bool DescriptorPool::TryFindFileInFallbackDatabase(
     StringPiece name) const {
   if (fallback_database_ == nullptr) return false;
@@ -2380,6 +2384,8 @@ bool DescriptorPool::TryFindFileInFallbackDatabase(
   if (tables_->known_bad_files_.count(name_string) > 0) return false;
 
   FileDescriptorProto file_proto;
+  //jindu4
+  //这里的类型是SourceTreeDescriptorDatabase
   if (!fallback_database_->FindFileByName(name_string, &file_proto) ||
       BuildFileFromDatabase(file_proto) == nullptr) {
     tables_->known_bad_files_.insert(std::move(name_string));

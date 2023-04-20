@@ -144,6 +144,8 @@ StringOutputStream::StringOutputStream(std::string* target) : target_(target) {}
 //ok 获取可用的内存指针和对应的内存大小
 bool StringOutputStream::Next(void** data, int* size) {
   GOOGLE_CHECK(target_ != NULL);
+  //不知道为什么不用size_type
+  //size_type的定义通常与size_t相同
   size_t old_size = target_->size();
 
   // Grow the string.
@@ -153,7 +155,6 @@ bool StringOutputStream::Next(void** data, int* size) {
     // without a memory allocation this way.
     new_size = target_->capacity(); 
   } else {
-  //这里是等于的情况
     // Size has reached capacity, try to double it.
     new_size = old_size * 2;
   }

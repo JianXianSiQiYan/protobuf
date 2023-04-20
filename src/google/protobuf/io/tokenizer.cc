@@ -122,6 +122,7 @@ namespace {
 
 CHARACTER_CLASS(Whitespace, c == ' ' || c == '\n' || c == '\t' || c == '\r' ||
                                 c == '\v' || c == '\f');
+//'\r' 回车 '\v' 垂直制表 '\f' 换页
 CHARACTER_CLASS(WhitespaceNoNewline,
                 c == ' ' || c == '\t' || c == '\r' || c == '\v' || c == '\f');
 
@@ -147,6 +148,8 @@ CHARACTER_CLASS(Escape, c == 'a' || c == 'b' || c == 'f' || c == 'n' ||
 
 // Given a char, interpret it as a numeric digit and return its value.
 // This supports any number base up to 36.
+//ok
+//返回十六进制字符的值
 inline int DigitValue(char digit) {
   if ('0' <= digit && digit <= '9') return digit - '0';
   if ('a' <= digit && digit <= 'z') return digit - 'a' + 10;
@@ -155,6 +158,7 @@ inline int DigitValue(char digit) {
 }
 
 // Inline because it's only used in one place.
+//ok
 inline char TranslateEscape(char c) {
   switch (c) {
     case 'a':
@@ -241,7 +245,9 @@ void Tokenizer::set_report_newlines(bool report) {
 
 // -------------------------------------------------------------------
 // Internal helpers.
-
+//ok
+//更新line_和column_
+//将下一个字符更新到current_char_
 void Tokenizer::NextChar() {
   // Update our line and column counters based on the character being
   // consumed.
@@ -262,7 +268,8 @@ void Tokenizer::NextChar() {
     Refresh();
   }
 }
-
+//ok
+//重新申请字符串内容，更新buffer_相关的变量，buffer_更新之前更新一下record_target_
 void Tokenizer::Refresh() {
   if (read_error_) {
     current_char_ = '\0';
@@ -293,12 +300,15 @@ void Tokenizer::Refresh() {
 
   current_char_ = buffer_[0];
 }
-
+//ok
+//开始记录token，保存在target
 inline void Tokenizer::RecordTo(std::string* target) {
   record_target_ = target;
   record_start_ = buffer_pos_;
 }
 
+//ok
+//结束记录token
 inline void Tokenizer::StopRecording() {
   // Note:  The if() is necessary because some STL implementations crash when
   //   you call string::append(NULL, 0), presumably because they are trying to
@@ -311,7 +321,7 @@ inline void Tokenizer::StopRecording() {
   record_target_ = NULL;
   record_start_ = -1;
 }
-
+//ok
 inline void Tokenizer::StartToken() {
   current_.type = TYPE_START;  // Just for the sake of initializing it.
   current_.text.clear();
@@ -327,12 +337,14 @@ inline void Tokenizer::EndToken() {
 
 // -------------------------------------------------------------------
 // Helper methods that consume characters.
-
+//ok
+//current_char_是否是CharacterClass中的字符
 template <typename CharacterClass>
 inline bool Tokenizer::LookingAt() {
   return CharacterClass::InClass(current_char_);
 }
-
+//ok
+//尝试吃掉一个CharacterClass并前进一个字符
 template <typename CharacterClass>
 inline bool Tokenizer::TryConsumeOne() {
   if (CharacterClass::InClass(current_char_)) {
@@ -342,7 +354,8 @@ inline bool Tokenizer::TryConsumeOne() {
     return false;
   }
 }
-
+//ok
+//如果current_char_是c，更新下一个字符到current_char_
 inline bool Tokenizer::TryConsume(char c) {
   if (current_char_ == c) {
     NextChar();
@@ -351,14 +364,16 @@ inline bool Tokenizer::TryConsume(char c) {
     return false;
   }
 }
-
+//ok
+//吃掉尽量多的CharacterClass
 template <typename CharacterClass>
 inline void Tokenizer::ConsumeZeroOrMore() {
   while (CharacterClass::InClass(current_char_)) {
     NextChar();
   }
 }
-
+//ok
+//尽量吃掉更多CharacterClass，如果第一个字符不是CharacterClass，报错并退出
 template <typename CharacterClass>
 inline void Tokenizer::ConsumeOneOrMore(const char* error) {
   if (!CharacterClass::InClass(current_char_)) {
@@ -373,7 +388,8 @@ inline void Tokenizer::ConsumeOneOrMore(const char* error) {
 // -------------------------------------------------------------------
 // Methods that read whole patterns matching certain kinds of tokens
 // or comments.
-
+//ok
+//匹配字符串
 void Tokenizer::ConsumeString(char delimiter) {
   while (true) {
     switch (current_char_) {
@@ -405,11 +421,13 @@ void Tokenizer::ConsumeString(char delimiter) {
           }
           // Possibly followed by another hex digit, but again we don't care.
         } else if (TryConsume('u')) {
+        //daiding
           if (!TryConsumeOne<HexDigit>() || !TryConsumeOne<HexDigit>() ||
               !TryConsumeOne<HexDigit>() || !TryConsumeOne<HexDigit>()) {
             AddError("Expected four hex digits for \\u escape sequence.");
           }
         } else if (TryConsume('U')) {
+        //daiding
           // We expect 8 hex digits; but only the range up to 0x10ffff is
           // legal.
           if (!TryConsume('0') || !TryConsume('0') ||
@@ -438,7 +456,10 @@ void Tokenizer::ConsumeString(char delimiter) {
     }
   }
 }
-
+//ok
+//识别十六进制、八进制、整数、小数
+//started_with_zero：上一个字符是否是0
+//started_with_dot：上一个字符是否是.
 Tokenizer::TokenType Tokenizer::ConsumeNumber(bool started_with_zero,
                                               bool started_with_dot) {
   bool is_float = false;
@@ -493,7 +514,8 @@ Tokenizer::TokenType Tokenizer::ConsumeNumber(bool started_with_zero,
 
   return is_float ? TYPE_FLOAT : TYPE_INTEGER;
 }
-
+//ok
+//匹配注释行，保存于content
 void Tokenizer::ConsumeLineComment(std::string* content) {
   if (content != NULL) RecordTo(content);
 
@@ -505,6 +527,7 @@ void Tokenizer::ConsumeLineComment(std::string* content) {
   if (content != NULL) StopRecording();
 }
 
+//ok
 void Tokenizer::ConsumeBlockComment(std::string* content) {
   int start_line = line_;
   int start_column = column_ - 2;
@@ -552,7 +575,8 @@ void Tokenizer::ConsumeBlockComment(std::string* content) {
     }
   }
 }
-
+//ok
+//把注释的开头吃掉，判断是哪种注释类型
 Tokenizer::NextCommentStatus Tokenizer::TryConsumeCommentStart() {
   if (comment_style_ == CPP_COMMENT_STYLE && TryConsume('/')) {
     if (TryConsume('/')) {
@@ -574,7 +598,7 @@ Tokenizer::NextCommentStatus Tokenizer::TryConsumeCommentStart() {
     return NO_COMMENT;
   }
 }
-
+//ok
 bool Tokenizer::TryConsumeWhitespace() {
   if (report_newlines_) {
     if (TryConsumeOne<WhitespaceNoNewline>()) {
@@ -591,7 +615,7 @@ bool Tokenizer::TryConsumeWhitespace() {
   }
   return false;
 }
-
+//ok
 bool Tokenizer::TryConsumeNewline() {
   if (!report_whitespace_ || !report_newlines_) {
     return false;
@@ -604,18 +628,20 @@ bool Tokenizer::TryConsumeNewline() {
 }
 
 // -------------------------------------------------------------------
-
+//ok
+//匹配下一个词语，保存在current_
 bool Tokenizer::Next() {
   previous_ = current_;
 
   while (!read_error_) {
     StartToken();
+    //是否将whitespace和newline作为token
     bool report_token = TryConsumeWhitespace() || TryConsumeNewline();
     EndToken();
     if (report_token) {
       return true;
     }
-
+    
     switch (TryConsumeCommentStart()) {
       case LINE_COMMENT:
         ConsumeLineComment(NULL);
@@ -648,7 +674,7 @@ bool Tokenizer::Next() {
     } else {
       // Reading some sort of token.
       StartToken();
-
+      //标识符以字母或_开头
       if (TryConsumeOne<Letter>()) {
         ConsumeZeroOrMore<Alphanumeric>();
         current_.type = TYPE_IDENTIFIER;
@@ -683,6 +709,7 @@ bool Tokenizer::Next() {
       } else {
         // Check if the high order bit is set.
         if (current_char_ & 0x80) {
+        //ASCII码 0~127，超过就是错的
           error_collector_->AddError(
               line_, column_,
               StringPrintf("Interpreting non ascii codepoint %d.",
@@ -715,6 +742,7 @@ namespace {
 // current comment goes into either prev_trailing_comments or detached_comments.
 // When the CommentCollector is destroyed, the last buffered comment goes into
 // next_leading_comments.
+//ok
 class CommentCollector {
  public:
   CommentCollector(std::string* prev_trailing_comments,
@@ -740,6 +768,7 @@ class CommentCollector {
 
   // About to read a line comment.  Get the comment buffer pointer in order to
   // read into it.
+  //ok
   std::string* GetBufferForLineComment() {
     // We want to combine with previous line comments, but not block comments.
     if (has_comment_ && !is_line_comment_) {
@@ -752,8 +781,10 @@ class CommentCollector {
 
   // About to read a block comment.  Get the comment buffer pointer in order to
   // read into it.
+  //ok
   std::string* GetBufferForBlockComment() {
     if (has_comment_) {
+    //块注释不做拼接，直接Flush
       Flush();
     }
     has_comment_ = true;
@@ -768,6 +799,8 @@ class CommentCollector {
 
   // Called once we know that the comment buffer is complete and is *not*
   // connected to the next token.
+  //ok
+  //comment_buffer_或者添加到prev_trailing_comments_，或者加入detached_comments_
   void Flush() {
     if (has_comment_) {
       if (can_attach_to_prev_) {
@@ -806,7 +839,7 @@ class CommentCollector {
 };
 
 }  // namespace
-
+//ok
 bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
                                  std::vector<std::string>* detached_comments,
                                  std::string* next_leading_comments) {
@@ -829,6 +862,7 @@ bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
   } else {
     // A comment appearing on the same line must be attached to the previous
     // declaration.
+    //daiding 这种情形不知道用来干嘛的，函数调用处的前面是非注释的token？
     ConsumeZeroOrMore<WhitespaceNoNewline>();
     switch (TryConsumeCommentStart()) {
       case LINE_COMMENT:
@@ -845,6 +879,7 @@ bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
         if (!TryConsume('\n')) {
           // Oops, the next token is on the same line.  If we recorded a comment
           // we really have no idea which token it should be attached to.
+          //daiding
           collector.ClearBuffer();
           return Next();
         }
@@ -908,7 +943,10 @@ bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
 // tokenizing.  Also, these can assume that whatever text they
 // are given is text that the tokenizer actually parsed as a token
 // of the given type.
-
+//ok
+//转译字符串text，要求转译值不大于max_value
+//成功时，将结果保存于*output并返回true
+//转译失败或转译值大于max_value，返回false
 bool Tokenizer::ParseInteger(const std::string& text, uint64_t max_value,
                              uint64_t* output) {
   // Sadly, we can't just use strtoul() since it is only 32-bit and strtoull()
@@ -948,7 +986,8 @@ bool Tokenizer::ParseInteger(const std::string& text, uint64_t max_value,
   *output = result;
   return true;
 }
-
+//ok
+//扫描浮点数并返回
 double Tokenizer::ParseFloat(const std::string& text) {
   const char* start = text.c_str();
   char* end;
@@ -969,6 +1008,7 @@ double Tokenizer::ParseFloat(const std::string& text) {
   }
 
   GOOGLE_LOG_IF(DFATAL,
+        //负小数的场景没用到，所以报错吧
          static_cast<size_t>(end - start) != text.size() || *start == '-')
       << " Tokenizer::ParseFloat() passed text that could not have been"
          " tokenized as a float: "
@@ -1085,6 +1125,9 @@ static const char* FetchUnicodePoint(const char* ptr, uint32_t* code_point) {
 
 // The text string must begin and end with single or double quote
 // characters.
+//ok
+//text的第一个字符是'\''或者'\"'
+//将text去escape，填到output，例如'\\''t'，填入'\t'
 void Tokenizer::ParseStringAppend(const std::string& text,
                                   std::string* output) {
   // Reminder: text[0] is always a quote character.  (If text is
@@ -1115,6 +1158,7 @@ void Tokenizer::ParseStringAppend(const std::string& text,
       ++ptr;
 
       if (OctalDigit::InClass(*ptr)) {
+      //计算至多后3个八进制字符值
         // An octal escape.  May one, two, or three digits.
         int code = DigitValue(*ptr);
         if (OctalDigit::InClass(ptr[1])) {
@@ -1128,6 +1172,7 @@ void Tokenizer::ParseStringAppend(const std::string& text,
         output->push_back(static_cast<char>(code));
 
       } else if (*ptr == 'x') {
+      //计算至多后2个十六进制字符值
         // A hex escape.  May zero, one, or two digits.  (The zero case
         // will have been caught as an error earlier.)
         int code = 0;
@@ -1142,6 +1187,7 @@ void Tokenizer::ParseStringAppend(const std::string& text,
         output->push_back(static_cast<char>(code));
 
       } else if (*ptr == 'u' || *ptr == 'U') {
+      //daiding 暂时不需要看吧
         uint32_t unicode;
         const char* end = FetchUnicodePoint(ptr, &unicode);
         if (end == ptr) {

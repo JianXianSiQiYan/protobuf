@@ -172,7 +172,7 @@ class FileGenerator {
   // platforms. Since these names are part of protobuf public API, renaming is
   // generally a breaking change so we prefer the #undef approach.
   void GenerateMacroUndefs(io::Printer* printer);
-
+  //daiding
   bool IsDepWeak(const FileDescriptor* dep) const {
     if (weak_deps_.count(dep) != 0) {
       GOOGLE_CHECK(!options_.opensource_runtime);

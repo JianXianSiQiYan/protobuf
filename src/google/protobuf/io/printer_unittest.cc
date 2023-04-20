@@ -127,7 +127,6 @@ TEST(Printer, VariableSubstitution) {
       vars["foo"] = "World";
       vars["bar"] = "$foo$";
       vars["abcdefg"] = "1234";
-
       printer.Print(vars, "Hello $foo$!\nbar = $bar$\n");
       printer.PrintRaw("RawBit\n");
       printer.Print(vars, "$abcdefg$\nA literal dollar sign:  $$");

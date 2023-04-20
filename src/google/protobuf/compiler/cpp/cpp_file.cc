@@ -88,7 +88,7 @@ std::vector<const T*> Sorted(const std::unordered_set<const T*>& vals) {
 }
 
 }  // namespace
-
+//
 FileGenerator::FileGenerator(const FileDescriptor* file, const Options& options)
     : file_(file), options_(options), scc_analyzer_(options) {
   // These variables are the same on a file level
@@ -104,7 +104,8 @@ FileGenerator::FileGenerator(const FileDescriptor* file, const Options& options)
       UniqueName("file_level_service_descriptors", file_, options_);
   variables_["filename"] = file_->name();
   variables_["package_ns"] = Namespace(file_, options);
-
+  
+  //message_type_count_为什么是9
   std::vector<const Descriptor*> msgs = FlattenMessagesInFile(file);
   for (int i = 0; i < msgs.size(); i++) {
     // Deleted in destructor
@@ -113,32 +114,35 @@ FileGenerator::FileGenerator(const FileDescriptor* file, const Options& options)
     message_generators_.emplace_back(msg_gen);
     msg_gen->AddGenerators(&enum_generators_, &extension_generators_);
   }
-
+  //待定
   for (int i = 0; i < file->enum_type_count(); i++) {
     enum_generators_.emplace_back(
         new EnumGenerator(file->enum_type(i), variables_, options));
   }
-
+  //待定
   for (int i = 0; i < file->service_count(); i++) {
     service_generators_.emplace_back(
         new ServiceGenerator(file->service(i), variables_, options));
   }
+  //待定
   if (HasGenericServices(file_, options_)) {
     for (int i = 0; i < service_generators_.size(); i++) {
       service_generators_[i]->index_in_metadata_ = i;
     }
   }
+  //待定
   for (int i = 0; i < file->extension_count(); i++) {
     extension_generators_.emplace_back(
         new ExtensionGenerator(file->extension(i), options, &scc_analyzer_));
   }
+  //待定
   for (int i = 0; i < file->weak_dependency_count(); ++i) {
     weak_deps_.insert(file->weak_dependency(i));
   }
 }
 
 FileGenerator::~FileGenerator() = default;
-
+//daiding
 void FileGenerator::GenerateMacroUndefs(io::Printer* printer) {
   Formatter format(printer, variables_);
   // Only do this for protobuf's own types. There are some google3 protos using
@@ -271,12 +275,14 @@ void FileGenerator::GenerateProtoHeader(io::Printer* printer,
   GenerateBottomHeaderGuard(printer, false);
 }
 
+//info_path：暂时理解成""
 void FileGenerator::GeneratePBHeader(io::Printer* printer,
                                      const std::string& info_path) {
   Formatter format(printer, variables_);
   GenerateTopHeaderGuard(printer, true);
 
   if (options_.proto_h) {
+  //daiding
     std::string target_basename = StripProto(file_->name());
     if (!options_.opensource_runtime) {
       GetBootstrapBasename(options_, target_basename, &target_basename);
@@ -286,7 +292,7 @@ void FileGenerator::GeneratePBHeader(io::Printer* printer,
   } else {
     GenerateLibraryIncludes(printer);
   }
-
+  
   if (options_.transitive_pb_h) {
     GenerateDependencyIncludes(printer);
   }
@@ -299,8 +305,10 @@ void FileGenerator::GeneratePBHeader(io::Printer* printer,
   GenerateMetadataPragma(printer, info_path);
 
   if (!options_.proto_h) {
+      
     GenerateHeader(printer);
   } else {
+  //daiding
     {
       NamespaceOpener ns(Namespace(file_, options_), format);
       format(
@@ -315,10 +323,13 @@ void FileGenerator::GeneratePBHeader(io::Printer* printer,
 
   GenerateBottomHeaderGuard(printer, true);
 }
-
+//ok
+//对google3_name做些许修改，打印到printer中
 void FileGenerator::DoIncludeFile(const std::string& google3_name,
                                   bool do_export, io::Printer* printer) {
   Formatter format(printer, variables_);
+  //这里为什么不用const std::string&，因为这里的最终效果跟const std::string prefix{"net/proto2/"}；
+  //类似，不存在中间变量，没必要用引用
   const std::string prefix = "net/proto2/";
   GOOGLE_CHECK(google3_name.find(prefix) == 0) << google3_name;
 
@@ -344,7 +355,7 @@ void FileGenerator::DoIncludeFile(const std::string& google3_name,
 
   format("\n");
 }
-
+//daiding
 std::string FileGenerator::CreateHeaderInclude(const std::string& basename,
                                                const FileDescriptor* file) {
   bool use_system_include = false;
@@ -1108,7 +1119,7 @@ void FileGenerator::GenerateForwardDeclarations(io::Printer* printer) {
   }
   format("PROTOBUF_NAMESPACE_CLOSE\n");
 }
-
+//ok include一些文件
 void FileGenerator::GenerateTopHeaderGuard(io::Printer* printer, bool pb_h) {
   Formatter format(printer, variables_);
   // Generate top of header.
@@ -1134,9 +1145,12 @@ void FileGenerator::GenerateBottomHeaderGuard(io::Printer* printer, bool pb_h) {
   format("#endif  // $GOOGLE_PROTOBUF$_INCLUDED_$1$\n",
          IncludeGuard(file_, pb_h, options_));
 }
-
+//ok
+//include一些文件
 void FileGenerator::GenerateLibraryIncludes(io::Printer* printer) {
   Formatter format(printer, variables_);
+
+  //daiding
   if (UsingImplicitWeakFields(file_, options_)) {
     IncludeFile("net/proto2/public/implicit_weak_message.h", printer);
   }
@@ -1250,7 +1264,7 @@ void FileGenerator::GenerateLibraryIncludes(io::Printer* printer) {
     IncludeFile("net/proto2/public/unknown_field_set.h", printer);
   }
 }
-
+//daiding
 void FileGenerator::GenerateMetadataPragma(io::Printer* printer,
                                            const std::string& info_path) {
   Formatter format(printer, variables_);
@@ -1265,16 +1279,18 @@ void FileGenerator::GenerateMetadataPragma(io::Printer* printer,
         "#endif  // $guard$\n");
   }
 }
-
+//daiding
 void FileGenerator::GenerateDependencyIncludes(io::Printer* printer) {
   Formatter format(printer, variables_);
   for (int i = 0; i < file_->dependency_count(); i++) {
     std::string basename = StripProto(file_->dependency(i)->name());
 
     // Do not import weak deps.
+    //daiding
     if (IsDepWeak(file_->dependency(i))) continue;
 
     if (IsBootstrapProto(options_, file_)) {
+    //daiding
       GetBootstrapBasename(options_, basename, &basename);
     }
 
@@ -1310,6 +1326,7 @@ void FileGenerator::GenerateGlobalStateFunctionDeclarations(
       "serialization_table[];\n"
       "  static const $uint32$ offsets[];\n"
       "};\n",
+      
       std::max(size_t(1), message_generators_.size()));
   if (HasDescriptorMethods(file_, options_)) {
     format(

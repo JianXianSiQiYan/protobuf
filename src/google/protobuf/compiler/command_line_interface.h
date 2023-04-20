@@ -351,12 +351,14 @@ class PROTOC_EXPORT CommandLineInterface {
     std::string help_text;
   };
   typedef std::map<std::string, GeneratorInfo> GeneratorMap;
+  //在main函数的开头已经注册了
   GeneratorMap generators_by_flag_name_;
   GeneratorMap generators_by_option_name_;
   // A map from generator names to the parameters specified using the option
   // flag. For example, if the user invokes the compiler with:
   //   protoc --foo_out=outputdir --foo_opt=enable_bar ...
   // Then there will be an entry ("--foo_out", "enable_bar") in this map.
+  //daiding
   std::map<std::string, std::string> generator_parameters_;
   // Similar to generator_parameters_, but stores the parameters for plugins.
   std::map<std::string, std::string> plugin_parameters_;
@@ -395,7 +397,7 @@ class PROTOC_EXPORT CommandLineInterface {
 
   // True if we should treat warnings as errors that fail the compilation.
   bool fatal_warnings_ = false;
-    //依赖的protobuf文件
+    //依赖的protobuf文件路径
   std::vector<std::pair<std::string, std::string> >
       proto_path_;                        // Search path for proto files.
     //将要编译的文件
@@ -413,11 +415,15 @@ class PROTOC_EXPORT CommandLineInterface {
   // output_directives_ lists all the files we are supposed to output and what
   // generator to use for each.
   struct OutputDirective {
+    //例如--cpp_out
     std::string name;          // E.g. "--foo_out"
     CodeGenerator* generator;  // NULL for plugins
+    //在ParseArgument获取
     std::string parameter;
+    //在ParseArgument获取
     std::string output_location;
   };
+  //应该是每种语言有一个
   std::vector<OutputDirective> output_directives_;
 
   // When using --encode or --decode, this names the type we are encoding or

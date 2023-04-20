@@ -71,7 +71,7 @@ Printer::~Printer() {
     output_->BackUp(buffer_size_);
   }
 }
-
+//ok
 bool Printer::GetSubstitutionRange(const char* varname,
                                    std::pair<size_t, size_t>* range) {
   std::map<std::string, std::pair<size_t, size_t> >::const_iterator iter =
@@ -113,6 +113,7 @@ void Printer::Annotate(const char* begin_varname, const char* end_varname,
 void Printer::Print(const std::map<std::string, std::string>& variables,
                     const char* text) {
   int size = strlen(text);
+  //下一个将要写的位置
   int pos = 0;  // The number of bytes we've written so far.
   substitutions_.clear();
   line_start_variables_.clear();
@@ -121,6 +122,7 @@ void Printer::Print(const std::map<std::string, std::string>& variables,
     if (text[i] == '\n') {
       // Saw newline.  If there is more text, we may need to insert an indent
       // here.  So, write what we have so far, including the '\n'.
+      //i-pos+1 +1是把\n也写入
       WriteRaw(text + pos, i - pos + 1);
       pos = i + 1;
 
@@ -182,9 +184,9 @@ void Printer::Print(const std::map<std::string, std::string>& variables,
   // Write the rest.
   WriteRaw(text + pos, size - pos);
 }
-
+//ok
 void Printer::Indent() { indent_ += "  "; }
-
+//ok
 void Printer::Outdent() {
   if (indent_.empty()) {
     GOOGLE_LOG(DFATAL) << " Outdent() without matching Indent().";
@@ -228,7 +230,7 @@ void Printer::WriteRaw(const char* data, int size) {
 
   CopyToBuffer(data, size);
 }
-
+//ok
 bool Printer::Next() {
   do {
     void* void_buffer;
@@ -240,7 +242,7 @@ bool Printer::Next() {
   } while (buffer_size_ == 0);
   return true;
 }
-
+//ok 把从data开始，size大小的内容写入文件中
 void Printer::CopyToBuffer(const char* data, int size) {
   if (failed_) return;
   if (size == 0) return;
@@ -266,19 +268,20 @@ void Printer::CopyToBuffer(const char* data, int size) {
   buffer_size_ -= size;
   offset_ += size;
 }
-
+//ok
 void Printer::IndentIfAtStart() {
   if (at_start_of_line_) {
     CopyToBuffer(indent_.data(), indent_.size());
     at_start_of_line_ = false;
   }
 }
-
+//ok
 void Printer::FormatInternal(const std::vector<std::string>& args,
                              const std::map<std::string, std::string>& vars,
                              const char* format) {
   auto save = format;
   int arg_index = 0;
+  //临时变量，用于判断annotations是否完整
   std::vector<AnnotationCollector::Annotation> annotations;
   while (*format) {
     char c = *format++;
@@ -303,7 +306,14 @@ void Printer::FormatInternal(const std::vector<std::string>& args,
     GOOGLE_LOG(FATAL) << " Annotation range is not-closed, expect $}$. " << save;
   }
 }
-
+//args：用于替换$1$ $2$等
+//vars：参数替换map
+//format：原始string
+//arg_index：记录$1$ $2$等的当前顺序
+//annotations：临时变量，用于判断annotations是否完整
+//format的前一个字符是$
+//format的类型为const char*& format更合适吧
+//ok
 const char* Printer::WriteVariable(
     const std::vector<std::string>& args,
     const std::map<std::string, std::string>& vars, const char* format,
@@ -328,6 +338,7 @@ const char* Printer::WriteVariable(
       GOOGLE_LOG(FATAL) << "Annotation ${" << idx + 1 << "$ is out of bounds.";
     }
     if (idx > *arg_index) {
+    //必须是1、2、3...？
       GOOGLE_LOG(FATAL) << "Annotation arg must be in correct order as given. Expected"
                  << " ${" << (*arg_index) + 1 << "$ got ${" << idx + 1 << "$.";
     } else if (idx == *arg_index) {
@@ -339,6 +350,7 @@ const char* Printer::WriteVariable(
   } else if (*start == '}') {
     GOOGLE_CHECK(annotations);
     if (annotations->empty()) {
+    //里面throw了，throw之后整个程序应该退出了
       GOOGLE_LOG(FATAL) << "Unexpected end of annotation found.";
     }
     auto& a = annotations->back();

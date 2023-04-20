@@ -91,6 +91,7 @@ class PROTOBUF_EXPORT SourceTreeDescriptorDatabase : public DescriptorDatabase {
   // to the given MultiFileErrorCollector.  This should be called before
   // parsing.  error_collector must remain valid until either this method
   // is called again or the SourceTreeDescriptorDatabase is destroyed.
+  //使用到的是ErrorPrinter
   void RecordErrorsTo(MultiFileErrorCollector* error_collector) {
     error_collector_ = error_collector;
   }
@@ -115,7 +116,7 @@ class PROTOBUF_EXPORT SourceTreeDescriptorDatabase : public DescriptorDatabase {
 
  private:
   class SingleFileErrorCollector;
-
+  //当前使用的类型是DiskSourceTree
   SourceTree* source_tree_;
   DescriptorDatabase* fallback_database_;
   MultiFileErrorCollector* error_collector_;
@@ -213,7 +214,6 @@ class PROTOBUF_EXPORT MultiFileErrorCollector {
 // Used by the default implementation of Importer to resolve import statements
 // Most users will probably want to use the DiskSourceTree implementation,
 // below.
-//进度
 class PROTOBUF_EXPORT SourceTree {
  public:
   inline SourceTree() {}

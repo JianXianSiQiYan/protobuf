@@ -122,6 +122,8 @@ bool IsLowercase(char c) { return c >= 'a' && c <= 'z'; }
 
 bool IsNumber(char c) { return c >= '0' && c <= '9'; }
 
+//ok
+//需满足头字符是大写，且所有字符不包含'_'
 bool IsUpperCamelCase(const std::string& name) {
   if (name.empty()) {
     return true;
@@ -191,17 +193,19 @@ Parser::Parser()
 Parser::~Parser() {}
 
 // ===================================================================
-
+//ok
+//当前token的名字是否等于text
 inline bool Parser::LookingAt(const char* text) {
   return input_->current().text == text;
 }
-
+//ok
+//当前token的类型是否等于token_type
 inline bool Parser::LookingAtType(io::Tokenizer::TokenType token_type) {
   return input_->current().type == token_type;
 }
 
 inline bool Parser::AtEnd() { return LookingAtType(io::Tokenizer::TYPE_END); }
-
+//ok
 bool Parser::TryConsume(const char* text) {
   if (LookingAt(text)) {
     input_->Next();
@@ -210,7 +214,7 @@ bool Parser::TryConsume(const char* text) {
     return false;
   }
 }
-
+//ok
 bool Parser::Consume(const char* text, const char* error) {
   if (TryConsume(text)) {
     return true;
@@ -219,7 +223,7 @@ bool Parser::Consume(const char* text, const char* error) {
     return false;
   }
 }
-
+//ok
 bool Parser::Consume(const char* text) {
   if (TryConsume(text)) {
     return true;
@@ -228,7 +232,8 @@ bool Parser::Consume(const char* text) {
     return false;
   }
 }
-
+//ok
+//查看当前token的类型是否是TYPE_IDENTIFIER，是则保存其名字到output
 bool Parser::ConsumeIdentifier(std::string* output, const char* error) {
   if (LookingAtType(io::Tokenizer::TYPE_IDENTIFIER)) {
     *output = input_->current().text;
@@ -288,7 +293,10 @@ bool Parser::ConsumeInteger64(uint64_t max_value, uint64_t* output,
     return false;
   }
 }
-
+//ok
+//扫描数值，扫描成功则将数值保存到output，否则打印*error
+//output：外层新增的double变量，用于保存数值
+//error：如果有错误，将要保存的打印
 bool Parser::ConsumeNumber(double* output, const char* error) {
   if (LookingAtType(io::Tokenizer::TYPE_FLOAT)) {
     *output = io::Tokenizer::ParseFloat(input_->current().text);
@@ -300,6 +308,7 @@ bool Parser::ConsumeNumber(double* output, const char* error) {
     if (!io::Tokenizer::ParseInteger(input_->current().text,
                                      std::numeric_limits<uint64_t>::max(),
                                      &value)) {
+        //转译失败也会到这里
       AddError("Integer out of range.");
       // We still return true because we did, in fact, parse a number.
     }
@@ -319,7 +328,8 @@ bool Parser::ConsumeNumber(double* output, const char* error) {
     return false;
   }
 }
-
+//ok
+//读取string到output
 bool Parser::ConsumeString(std::string* output, const char* error) {
   if (LookingAtType(io::Tokenizer::TYPE_STRING)) {
     io::Tokenizer::ParseString(input_->current().text, output);
@@ -335,20 +345,28 @@ bool Parser::ConsumeString(std::string* output, const char* error) {
     return false;
   }
 }
-
+//daiding 结束一个表达式，处理注释相关的事情
+//text：想要吃掉的字符串指针
+//location：当前的location指针
 bool Parser::TryConsumeEndOfDeclaration(const char* text,
                                         const LocationRecorder* location) {
   if (LookingAt(text)) {
     std::string leading, trailing;
     std::vector<std::string> detached;
+    //trailing：表达式的后置注释
+    //detached：下一个表达式的离岸注释
+    //leading：下一个表达式的前置注释
     input_->NextWithComments(&trailing, &detached, &leading);
 
     // Save the leading comments for next time, and recall the leading comments
     // from last time.
+    //获取本表达式的前置注释，保存下一个表达式的前置注释到upcoming_doc_comments_
     leading.swap(upcoming_doc_comments_);
 
     if (location != NULL) {
+        //获取本表达式的离岸注释，保存下一个表达式的离岸注释到upcoming_detached_comments_
       upcoming_detached_comments_.swap(detached);
+      //此时leading、trailing、detached都是本表达式的
       location->AttachComments(&leading, &trailing, &detached);
     } else if (strcmp(text, "}") == 0) {
       // If the current location is null and we are finishing the current scope,
@@ -366,7 +384,7 @@ bool Parser::TryConsumeEndOfDeclaration(const char* text,
     return false;
   }
 }
-
+//ok
 bool Parser::ConsumeEndOfDeclaration(const char* text,
                                      const LocationRecorder* location) {
   if (TryConsumeEndOfDeclaration(text, location)) {
@@ -442,7 +460,7 @@ void Parser::LocationRecorder::Init(const LocationRecorder& parent,
   location_->add_span(parser_->input_->current().line);
   location_->add_span(parser_->input_->current().column);
 }
-
+//没有主动调用EndAt，那么记录就在上一个token结束？
 Parser::LocationRecorder::~LocationRecorder() {
   if (location_->span_size() <= 2) {
     EndAt(parser_->input_->previous());
@@ -469,7 +487,8 @@ void Parser::LocationRecorder::EndAt(const io::Tokenizer::Token& token) {
   }
   location_->add_span(token.end_column);
 }
-
+//ok
+//向parser_->source_location_table_加入一个元素
 void Parser::LocationRecorder::RecordLegacyLocation(
     const Message* descriptor,
     DescriptorPool::ErrorCollector::ErrorLocation location) {
@@ -490,7 +509,8 @@ void Parser::LocationRecorder::RecordLegacyImportLocation(
 int Parser::LocationRecorder::CurrentPathSize() const {
   return location_->path_size();
 }
-
+//ok
+//把leading、trailing、detached_comments更新到location_
 void Parser::LocationRecorder::AttachComments(
     std::string* leading, std::string* trailing,
     std::vector<std::string>* detached_comments) const {
@@ -613,7 +633,8 @@ bool Parser::ValidateEnum(const EnumDescriptorProto* proto) {
 
   return true;
 }
-
+//input：里面包含了文件信息，可以获取文件的内容
+//file：外层新建对象
 bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
   input_ = input;
   had_errors_ = false;
@@ -646,6 +667,7 @@ bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
       // Store the syntax into the file.
       if (file != NULL) file->set_syntax(syntax_identifier_);
     } else if (!stop_after_syntax_identifier_) {
+    //daiding
       GOOGLE_LOG(WARNING) << "No syntax specified for the proto file: " << file->name()
                    << ". Please use 'syntax = \"proto2\";' "
                    << "or 'syntax = \"proto3\";' to specify a syntax "
@@ -654,8 +676,9 @@ bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
     }
 
     if (stop_after_syntax_identifier_) return !had_errors_;
-
+    
     // Repeatedly parse statements until we reach the end of the file.
+    //jindu5
     while (!AtEnd()) {
       if (!ParseTopLevelStatement(file, root_location)) {
         // This statement failed to parse.  Skip it, but keep looping to parse
@@ -677,7 +700,8 @@ bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
   source_code_info.Swap(file->mutable_source_code_info());
   return !had_errors_;
 }
-
+//ok
+//扫描syntax token，保存于syntax_identifier_
 bool Parser::ParseSyntaxIdentifier(const LocationRecorder& parent) {
   LocationRecorder syntax_location(parent,
                                    FileDescriptorProto::kSyntaxFieldNumber);
@@ -694,6 +718,7 @@ bool Parser::ParseSyntaxIdentifier(const LocationRecorder& parent) {
 
   if (syntax != "proto2" && syntax != "proto3" &&
       !stop_after_syntax_identifier_) {
+      //daiding
     AddError(syntax_token.line, syntax_token.column,
              "Unrecognized syntax identifier \"" + syntax +
                  "\".  This parser "
@@ -704,6 +729,8 @@ bool Parser::ParseSyntaxIdentifier(const LocationRecorder& parent) {
   return true;
 }
 
+//file：外层新对象
+//root_location：当前的location
 bool Parser::ParseTopLevelStatement(FileDescriptorProto* file,
                                     const LocationRecorder& root_location) {
   if (TryConsumeEndOfDeclaration(";", NULL)) {
@@ -749,7 +776,9 @@ bool Parser::ParseTopLevelStatement(FileDescriptorProto* file,
 
 // -------------------------------------------------------------------
 // Messages
-
+//message：新增的消息，此函数会往里面填内容
+//message_location：当前的location
+//containing_file：当前文件扫描后的信息就记录在里面
 bool Parser::ParseMessageDefinition(
     DescriptorProto* message, const LocationRecorder& message_location,
     const FileDescriptorProto* containing_file) {
@@ -767,6 +796,7 @@ bool Parser::ParseMessageDefinition(
           ". See https://developers.google.com/protocol-buffers/docs/style");
     }
   }
+  
   DO(ParseMessageBlock(message, message_location, containing_file));
 
   if (syntax_identifier_ == "proto3") {
@@ -856,7 +886,9 @@ void AdjustReservedRangesWithMaxEndNumber(DescriptorProto* message) {
 }
 
 }  // namespace
-
+//message：新增的消息，此函数会往里面填内容
+//message_location：当前的location
+//containing_file：当前文件扫描后的信息就记录在里面
 bool Parser::ParseMessageBlock(DescriptorProto* message,
                                const LocationRecorder& message_location,
                                const FileDescriptorProto* containing_file) {
@@ -883,7 +915,10 @@ bool Parser::ParseMessageBlock(DescriptorProto* message,
   }
   return true;
 }
-
+//message：新增的消息，此函数会往里面填内容
+//message_location：当前的location
+//containing_file：当前文件扫描后的信息就记录在里面
+//jindu6
 bool Parser::ParseMessageStatement(DescriptorProto* message,
                                    const LocationRecorder& message_location,
                                    const FileDescriptorProto* containing_file) {
@@ -1386,13 +1421,14 @@ bool Parser::ParseJsonName(FieldDescriptorProto* field,
                    "Expected string for JSON name."));
   return true;
 }
-
+//daiding
 bool Parser::ParseOptionNamePart(UninterpretedOption* uninterpreted_option,
                                  const LocationRecorder& part_location,
                                  const FileDescriptorProto* containing_file) {
   UninterpretedOption::NamePart* name = uninterpreted_option->add_name();
   std::string identifier;  // We parse identifiers into this string.
   if (LookingAt("(")) {    // This is an extension.
+  //daiding
     DO(Consume("("));
 
     {
@@ -1423,7 +1459,7 @@ bool Parser::ParseOptionNamePart(UninterpretedOption* uninterpreted_option,
   }
   return true;
 }
-
+//daiding
 bool Parser::ParseUninterpretedBlock(std::string* value) {
   // Note that enclosing braces are not added to *value.
   // We do NOT use ConsumeEndOfStatement for this brace because it's delimiting
@@ -1451,11 +1487,17 @@ bool Parser::ParseUninterpretedBlock(std::string* value) {
 
 // We don't interpret the option here. Instead we store it in an
 // UninterpretedOption, to be interpreted later.
+
+//options：新增的options消息，此函数会往里面填内容
+//options_location：当前的location
+//containing_file：当前文件扫描后的信息就记录在里面
+//jindu10
 bool Parser::ParseOption(Message* options,
                          const LocationRecorder& options_location,
                          const FileDescriptorProto* containing_file,
                          OptionStyle style) {
   // Create an entry in the uninterpreted_option field.
+  //获取可能存在的uninterpreted_option_field字段
   const FieldDescriptor* uninterpreted_option_field =
       options->GetDescriptor()->FindFieldByName("uninterpreted_option");
   GOOGLE_CHECK(uninterpreted_option_field != NULL)
@@ -1977,13 +2019,17 @@ bool Parser::ParseOneof(OneofDescriptorProto* oneof_decl,
 
 // -------------------------------------------------------------------
 // Enums
-
+//enum_type：新增的enum，此函数会往里面填内容
+//enum_location：当前的location
+//containing_file：当前文件扫描后的信息就记录在里面
+//jindu7
 bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
                                  const LocationRecorder& enum_location,
                                  const FileDescriptorProto* containing_file) {
   DO(Consume("enum"));
 
   {
+  
     LocationRecorder location(enum_location,
                               EnumDescriptorProto::kNameFieldNumber);
     location.RecordLegacyLocation(enum_type,
@@ -1997,7 +2043,10 @@ bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
 
   return true;
 }
-
+//enum_type：新增的enum，此函数会往里面填内容
+//enum_location：当前的location
+//containing_file：当前文件扫描后的信息就记录在里面
+//jindu8
 bool Parser::ParseEnumBlock(EnumDescriptorProto* enum_type,
                             const LocationRecorder& enum_location,
                             const FileDescriptorProto* containing_file) {
@@ -2019,6 +2068,10 @@ bool Parser::ParseEnumBlock(EnumDescriptorProto* enum_type,
   return true;
 }
 
+//enum_type：新增的enum，此函数会往里面填内容
+//enum_location：当前的location
+//containing_file：当前文件扫描后的信息就记录在里面
+//jindu9
 bool Parser::ParseEnumStatement(EnumDescriptorProto* enum_type,
                                 const LocationRecorder& enum_location,
                                 const FileDescriptorProto* containing_file) {
@@ -2422,7 +2475,8 @@ bool SourceLocationTable::FindImport(const Message* descriptor,
     return true;
   }
 }
-
+//ok
+//向location_map_加入一个元素
 void SourceLocationTable::Add(
     const Message* descriptor,
     DescriptorPool::ErrorCollector::ErrorLocation location, int line,

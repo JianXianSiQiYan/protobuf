@@ -144,7 +144,7 @@ FindOrNull(const Collection& collection,
 }
 
 // Same as above but returns a pointer to the non-const value.
-//´ý¶¨
+//ok
 template <class Collection>
 typename Collection::value_type::second_type*
 FindOrNull(Collection& collection,  // NOLINT
@@ -299,6 +299,7 @@ void InsertOrUpdateMany(Collection* const collection,
 // of the form map<Key, Value*> which owns the objects pointed to by the
 // value pointers.  If there was an existing value for the key, it is deleted.
 // True indicates an insert took place, false indicates an update + delete.
+//ok
 template <class Collection>
 bool InsertAndDeleteExisting(
     Collection* const collection,
@@ -318,6 +319,7 @@ bool InsertAndDeleteExisting(
 // given key did NOT already exist in the collection. If the key previously
 // existed in the collection, the value is not changed. Returns true if the
 // key-value pair was inserted; returns false if the key was already present.
+//ok
 template <class Collection>
 bool InsertIfNotPresent(Collection* const collection,
                         const typename Collection::value_type& vt) {

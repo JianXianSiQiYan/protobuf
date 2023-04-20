@@ -71,6 +71,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 
 
 PROTOBUF_CONSTINIT std::atomic<bool> init_protobuf_defaults_state{false};
+//ok
 static bool InitProtobufDefaultsImpl() {
   fixed_address_empty_string.DefaultConstruct();
   OnShutdownDestroyString(fixed_address_empty_string.get_mutable());

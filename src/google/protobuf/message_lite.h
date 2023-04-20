@@ -139,6 +139,7 @@ inline int ToIntSize(size_t size) {
 // 3. Call get() and get_mutable() only if the object is initialized.
 // 4. Call Destruct() only if the object is initialized.
 //    After the call, the object becomes uninitialized.
+//ok
 template <typename T>
 class ExplicitlyConstructed {
  public:
@@ -624,7 +625,8 @@ namespace internal {
 PROTOBUF_EXPORT void OnShutdown(void (*func)());
 // Run an arbitrary function on an arg
 PROTOBUF_EXPORT void OnShutdownRun(void (*f)(const void*), const void* arg);
-
+//ok
+//程序关闭时delete指针p
 template <typename T>
 T* OnShutdownDelete(T* p) {
   OnShutdownRun([](const void* pp) { delete static_cast<const T*>(pp); }, p);

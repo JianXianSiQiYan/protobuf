@@ -233,6 +233,7 @@ std::string FilenameIdentifier(const std::string& filename);
 // symbols in the global namespace
 std::string UniqueName(const std::string& name, const std::string& filename,
                        const Options& options);
+//ok
 inline std::string UniqueName(const std::string& name, const FileDescriptor* d,
                               const Options& options) {
   return UniqueName(name, d->name(), options);
@@ -476,7 +477,8 @@ bool IsAnyMessage(const FileDescriptor* descriptor, const Options& options);
 bool IsAnyMessage(const Descriptor* descriptor, const Options& options);
 
 bool IsWellKnownMessage(const FileDescriptor* descriptor);
-
+//ok
+//Ê¾Àý£ºwrappers.proto -> GOOGLE_PROTOBUF_INCLUDED_wrappers_2eproto
 inline std::string IncludeGuard(const FileDescriptor* file, bool pb_h,
                                 const Options& options) {
   // If we are generating a .pb.h file and the proto_h option is enabled, then
@@ -533,6 +535,7 @@ inline bool NeedsEagerDescriptorAssignment(const FileDescriptor* file,
 // This orders the messages in a .pb.cc as it's outputted by file.cc
 void FlattenMessagesInFile(const FileDescriptor* file,
                            std::vector<const Descriptor*>* result);
+
 inline std::vector<const Descriptor*> FlattenMessagesInFile(
     const FileDescriptor* file) {
   std::vector<const Descriptor*> result;
@@ -734,6 +737,7 @@ class PROTOC_EXPORT Formatter {
     for (const auto& keyval : vars) vars_[keyval.first] = keyval.second;
   }
 
+  //ok
   template <typename... Args>
   void operator()(const char* format, const Args&... args) const {
     printer_->FormatInternal({ToString(args)...}, vars_, format);

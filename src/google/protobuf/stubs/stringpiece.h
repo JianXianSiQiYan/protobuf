@@ -1,3 +1,4 @@
+//ºöÂÔ
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -327,6 +328,7 @@ class PROTOBUF_EXPORT StringPiece {
   size_type rfind(char c, size_type pos = npos) const;
 
   size_type find_first_of(StringPiece s, size_type pos = 0) const;
+  //ok
   size_type find_first_of(char c, size_type pos = 0) const {
     return find(c, pos);
   }

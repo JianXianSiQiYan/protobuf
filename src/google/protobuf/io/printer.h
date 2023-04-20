@@ -314,7 +314,7 @@ class PROTOBUF_EXPORT Printer {
 
   // Copy size worth of bytes from data to buffer_.
   void CopyToBuffer(const char* data, int size);
-
+  //ok
   void push_back(char c) {
     if (failed_) return;
     if (buffer_size_ == 0) {
@@ -333,19 +333,23 @@ class PROTOBUF_EXPORT Printer {
       const std::map<std::string, std::string>& vars, const char* format,
       int* arg_index,
       std::vector<AnnotationCollector::Annotation>* annotations);
-
+    //变量标志符，例如'$'
   const char variable_delimiter_;
 
   ZeroCopyOutputStream* const output_;
+  //从文件申请到的写入指针
   char* buffer_;
+  //从文件申请到的写入size
   int buffer_size_;
   // The current position, in bytes, in the output stream.  This is equivalent
   // to the total number of bytes that have been written so far.  This value is
   // used to calculate annotation ranges in the substitutions_ map below.
+  //从Printer被构建出来开始的总偏移
   size_t offset_;
-
+  //当前执行indent所要写的内容
   std::string indent_;
   bool at_start_of_line_;
+  //全局永久错误
   bool failed_;
 
   // A map from variable name to [start, end) offsets in the output buffer.

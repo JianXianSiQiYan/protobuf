@@ -2886,6 +2886,7 @@ struct MetadataOwner {
 
 void AddDescriptors(const DescriptorTable* table);
 
+//table：descriptor_table_google_2fprotobuf_2fdescriptor_2eproto
 void AssignDescriptorsImpl(const DescriptorTable* table, bool eager) {
   // Ensure the file descriptor is added to the pool.
   {
@@ -2942,9 +2943,11 @@ void AssignDescriptorsImpl(const DescriptorTable* table, bool eager) {
   MetadataOwner::Instance()->AddArray(table->file_level_metadata,
                                       helper.GetCurrentMetadataPtr());
 }
-
+//jindu12
+//table：descriptor_table_google_2fprotobuf_2fdescriptor_2eproto
 void AddDescriptorsImpl(const DescriptorTable* table) {
   // Reflection refers to the default fields so make sure they are initialized.
+  //这句话不知道用来干啥的。
   internal::InitProtobufDefaults();
 
   // Ensure all dependent descriptors are registered to the generated descriptor
@@ -2984,7 +2987,7 @@ void RegisterAllTypesInternal(const Metadata* file_level_metadata, int size) {
 }
 
 namespace internal {
-
+//jindu11
 Metadata AssignDescriptors(const DescriptorTable* (*table)(),
                            internal::once_flag* once,
                            const Metadata& metadata) {

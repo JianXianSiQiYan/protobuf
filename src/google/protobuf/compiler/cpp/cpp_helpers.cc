@@ -191,7 +191,7 @@ bool IsLazy(const FieldDescriptor* field, const Options& options,
   return IsLazilyVerifiedLazy(field, options) ||
          IsEagerlyVerifiedLazyImpl(field, options, scc_analyzer);
 }
-
+//ok
 void SetCommonVars(const Options& options,
                    std::map<std::string, std::string>* variables) {
   (*variables)["proto_ns"] = ProtobufNamespace(options);
@@ -364,7 +364,7 @@ std::string Namespace(const std::string& package) {
   if (package.empty()) return "";
   return "::" + DotsToColons(package);
 }
-
+//待定
 std::string Namespace(const FileDescriptor* d, const Options& options) {
   std::string ret = Namespace(d->package());
   if (IsWellKnownMessage(d) && options.opensource_runtime) {
@@ -732,6 +732,7 @@ std::string DefaultValue(const Options& options, const FieldDescriptor* field) {
 }
 
 // Convert a file name into a valid identifier.
+//ok 是数字和字母就照填，否则转换为十六进制数再填
 std::string FilenameIdentifier(const std::string& filename) {
   std::string result;
   for (int i = 0; i < filename.size(); i++) {
@@ -1007,7 +1008,7 @@ bool IsAnyMessage(const Descriptor* descriptor, const Options& options) {
   return descriptor->name() == kAnyMessageName &&
          IsAnyMessage(descriptor->file(), options);
 }
-
+//ok
 bool IsWellKnownMessage(const FileDescriptor* file) {
   static const std::unordered_set<std::string> well_known_files{
       "google/protobuf/any.proto",

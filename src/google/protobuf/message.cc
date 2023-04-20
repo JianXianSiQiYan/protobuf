@@ -216,7 +216,6 @@ MessageFactory::~MessageFactory() {}
 
 namespace {
 
-
 #define HASH_MAP std::unordered_map
 #define STR_HASH_FXN hash<::google::protobuf::StringPiece>
 
@@ -241,7 +240,7 @@ class GeneratedMessageFactory final : public MessageFactory {
   // Initialized lazily, so requires locking.
   std::unordered_map<const Descriptor*, const Message*> type_map_;
 };
-
+//ok
 GeneratedMessageFactory* GeneratedMessageFactory::singleton() {
   static auto instance =
       internal::OnShutdownDelete(new GeneratedMessageFactory);

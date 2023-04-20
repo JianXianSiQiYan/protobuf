@@ -128,7 +128,11 @@ void StripWhitespace(std::string *str) {
 //    and append the result to "res".  If replace_all is false,
 //    it only replaces the first instance of "old."
 // ----------------------------------------------------------------------
-
+//ok
+//将字符串s中的oldsub替换成newsub
+//s：源字符串
+//res：输出字符串
+//replace_all：是替换一次还是替换所有
 void StringReplace(const std::string &s, const std::string &oldsub,
                    const std::string &newsub, bool replace_all,
                    std::string *res) {
@@ -159,7 +163,7 @@ void StringReplace(const std::string &s, const std::string &oldsub,
 //    fails.  RETURN a new string, regardless of whether the replacement
 //    happened or not.
 // ----------------------------------------------------------------------
-
+//ok
 std::string StringReplace(const std::string &s, const std::string &oldsub,
                           const std::string &newsub, bool replace_all) {
   std::string ret;
@@ -175,6 +179,7 @@ std::string StringReplace(const std::string &s, const std::string &oldsub,
 // Note: For multi-character delimiters, this routine will split on *ANY* of
 // the characters in the string, not the entire string as a single delimiter.
 // ----------------------------------------------------------------------
+//ok
 template <typename ITR>
 static inline void SplitStringToIteratorUsing(StringPiece full,
                                               const char *delim, ITR &result) {
@@ -194,7 +199,6 @@ static inline void SplitStringToIteratorUsing(StringPiece full,
     }
     return;
   }
-
   std::string::size_type begin_index, end_index;
   begin_index = full.find_first_not_of(delim);
   while (begin_index != std::string::npos) {
@@ -208,7 +212,7 @@ static inline void SplitStringToIteratorUsing(StringPiece full,
     begin_index = full.find_first_not_of(delim, end_index);
   }
 }
-//delim为什么不传引用？
+//ok
 void SplitStringUsing(StringPiece full, const char *delim,
                       std::vector<std::string> *result) {
   std::back_insert_iterator<std::vector<std::string> > it(*result);
@@ -226,6 +230,7 @@ void SplitStringUsing(StringPiece full, const char *delim,
 //
 // If "pieces" is negative for some reason, it returns the whole string
 // ----------------------------------------------------------------------
+//ok 大概理解
 template <typename ITR>
 static inline void SplitStringToIteratorAllowEmpty(StringPiece full,
                                                    const char *delim,
@@ -245,7 +250,7 @@ static inline void SplitStringToIteratorAllowEmpty(StringPiece full,
   }
   *result++ = std::string(full.substr(begin_index));
 }
-
+//ok
 void SplitStringAllowEmpty(StringPiece full, const char *delim,
                            std::vector<std::string> *result) {
   std::back_insert_iterator<std::vector<std::string> > it(*result);
@@ -524,6 +529,8 @@ int CEscapeInternal(const char* src, int src_len, char* dest,
 // Calculates the length of the C-style escaped version of 'src'.
 // Assumes that non-printable characters are escaped using octal sequences, and
 // that UTF-8 bytes are not handled specially.
+//ok
+//\'等的大小为0，数字为1，其他不可打印的是4，详见CEscapeAndAppend
 static inline size_t CEscapedLength(StringPiece src) {
   static char c_escaped_len[256] = {
     4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 4, 4, 2, 4, 4,  // \t, \n, \r
@@ -558,6 +565,8 @@ static inline size_t CEscapedLength(StringPiece src) {
 // the required space using a lookup table, and also does not do any special
 // handling for Hex or UTF-8 characters.
 // ----------------------------------------------------------------------
+//ok
+//将src escape展开并保存在dest，例如'\t'转换成'\\' 't'
 void CEscapeAndAppend(StringPiece src, std::string *dest) {
   size_t escaped_len = CEscapedLength(src);
   if (escaped_len == src.size()) {
@@ -591,7 +600,8 @@ void CEscapeAndAppend(StringPiece src, std::string *dest) {
     }
   }
 }
-
+//ok
+//将src escape展开并保存在dest，例如'\t'转换成'\\' 't'
 std::string CEscape(const std::string &src) {
   std::string dest;
   CEscapeAndAppend(src, &dest);
@@ -959,7 +969,7 @@ static const char two_ASCII_digits[100][2] = {
   {'9','0'}, {'9','1'}, {'9','2'}, {'9','3'}, {'9','4'},
   {'9','5'}, {'9','6'}, {'9','7'}, {'9','8'}, {'9','9'}
 };
-
+//ok    没细看，知道意思
 char* FastUInt32ToBufferLeft(uint32 u, char* buffer) {
   uint32 digits;
   const char *ASCII_digits = nullptr;
@@ -1396,7 +1406,7 @@ char* FloatToBuffer(float value, char* buffer) {
 }
 
 namespace strings {
-
+//ok
 AlphaNum::AlphaNum(strings::Hex hex) {
   char *const end = &digits[kFastToBufferSize];
   char *writer = end;
@@ -1435,7 +1445,7 @@ static char *Append1(char *out, const AlphaNum &x) {
   }
   return out;
 }
-
+//ok
 static char *Append2(char *out, const AlphaNum &x1, const AlphaNum &x2) {
   if (x1.size() > 0) {
     memcpy(out, x1.data(), x1.size());
@@ -1566,15 +1576,16 @@ std::string StrCat(const AlphaNum &a, const AlphaNum &b, const AlphaNum &c,
 // the string we're appending to.  However the results of this are random.
 // Therefore, check for this in debug mode.  Use unsigned math so we only have
 // to do one comparison.
+//这个会发生？
 #define GOOGLE_DCHECK_NO_OVERLAP(dest, src) \
     GOOGLE_DCHECK_GT(uintptr_t((src).data() - (dest).data()), \
                      uintptr_t((dest).size()))
-
+//ok
 void StrAppend(std::string *result, const AlphaNum &a) {
   GOOGLE_DCHECK_NO_OVERLAP(*result, a);
   result->append(a.data(), a.size());
 }
-
+//ok
 void StrAppend(std::string *result, const AlphaNum &a, const AlphaNum &b) {
   GOOGLE_DCHECK_NO_OVERLAP(*result, a);
   GOOGLE_DCHECK_NO_OVERLAP(*result, b);
@@ -2438,7 +2449,11 @@ std::string LocalizeRadix(const char *input, const char *radix_pos) {
 }
 
 }  // namespace
-
+//ok
+//暂时理解成std::strtod
+//若转译成功，返回字符串对应的数值。若endptr指针非空，则设置*endptr指向最后被转译字符的后一字符。
+//若转译值过大，返回HUGE_VALF/HUGE_VAL/HUGE_VALL，若endptr指针非空，则设置*endptr指向最后被转译字符的后一字符。
+//若无法进行转换，则返回0，若endptr指针非空，则设置*endptr为str。
 double NoLocaleStrtod(const char *str, char **endptr) {
   // We cannot simply set the locale to "C" temporarily with setlocale()
   // as this is not thread-safe.  Instead, we try to parse in the current
@@ -2450,7 +2465,7 @@ double NoLocaleStrtod(const char *str, char **endptr) {
   double result = strtod(str, &temp_endptr);
   if (endptr != NULL) *endptr = temp_endptr;
   if (*temp_endptr != '.') return result;
-
+  //daiding 下面看不看都没关系吧
   // Parsing halted on a '.'.  Perhaps we're in a different locale?  Let's
   // try to replace the '.' with a locale-specific radix character and
   // try again.

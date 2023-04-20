@@ -64,6 +64,7 @@ bool CppGenerator::Generate(const FileDescriptor* file,
                             const std::string& parameter,
                             GeneratorContext* generator_context,
                             std::string* error) const {
+    //daiding
   std::vector<std::pair<std::string, std::string> > options;
   ParseGeneratorParameter(parameter, &options);
 
@@ -163,9 +164,8 @@ bool CppGenerator::Generate(const FileDescriptor* file,
 
   // -----------------------------------------------------------------
 
-
   std::string basename = StripProto(file->name());
-
+  //daiding
   if (MaybeBootstrap(file_options, generator_context, file_options.bootstrap,
                      &basename)) {
     return true;
@@ -175,6 +175,7 @@ bool CppGenerator::Generate(const FileDescriptor* file,
 
   // Generate header(s).
   if (file_options.proto_h) {
+  //daiding
     std::unique_ptr<io::ZeroCopyOutputStream> output(
         generator_context->Open(basename + ".proto.h"));
     GeneratedCodeInfo annotations;
@@ -194,6 +195,7 @@ bool CppGenerator::Generate(const FileDescriptor* file,
   }
 
   {
+  
     std::unique_ptr<io::ZeroCopyOutputStream> output(
         generator_context->Open(basename + ".pb.h"));
     GeneratedCodeInfo annotations;
@@ -203,6 +205,7 @@ bool CppGenerator::Generate(const FileDescriptor* file,
     io::Printer printer(
         output.get(), '$',
         file_options.annotate_headers ? &annotation_collector : NULL);
+    
     file_generator.GeneratePBHeader(
         &printer, file_options.annotate_headers ? info_path : "");
     if (file_options.annotate_headers) {

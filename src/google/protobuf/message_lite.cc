@@ -553,7 +553,7 @@ void InternalMetadata::DoSwap<std::string>(std::string* other) {
 // Shutdown support.
 
 namespace internal {
-
+//ok
 struct ShutdownData {
   ~ShutdownData() {
     std::reverse(functions.begin(), functions.end());
@@ -577,7 +577,7 @@ static void RunZeroArgFunc(const void* arg) {
 void OnShutdown(void (*func)()) {
   OnShutdownRun(RunZeroArgFunc, reinterpret_cast<void*>(func));
 }
-
+//ok
 void OnShutdownRun(void (*f)(const void*), const void* arg) {
   auto shutdown_data = ShutdownData::get();
   MutexLock lock(&shutdown_data->mutex);

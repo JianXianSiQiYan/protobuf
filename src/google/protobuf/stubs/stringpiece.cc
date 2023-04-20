@@ -1,3 +1,4 @@
+//忽略
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -95,7 +96,7 @@ StringPiece::size_type StringPiece::find(StringPiece s, size_type pos) const {
                                    s.ptr_, s.ptr_ + s.length_);
   return result == ptr_ + length_ ? npos : result - ptr_;
 }
-
+//ok
 StringPiece::size_type StringPiece::find(char c, size_type pos) const {
   if (length_ <= 0 || pos >= static_cast<size_type>(length_)) {
     return npos;
@@ -136,6 +137,7 @@ StringPiece::size_type StringPiece::rfind(char c, size_type pos) const {
 // the possible values of an unsigned char.  Thus it should be be declared
 // as follows:
 //   bool table[UCHAR_MAX + 1]
+//ok
 static inline void BuildLookupTable(StringPiece characters_wanted,
                                     bool* table) {
   const StringPiece::size_type length = characters_wanted.length();
@@ -144,7 +146,7 @@ static inline void BuildLookupTable(StringPiece characters_wanted,
     table[static_cast<unsigned char>(data[i])] = true;
   }
 }
-
+//ok
 StringPiece::size_type StringPiece::find_first_of(StringPiece s,
                                                   size_type pos) const {
   if (empty() || s.empty()) {
@@ -162,14 +164,14 @@ StringPiece::size_type StringPiece::find_first_of(StringPiece s,
   }
   return npos;
 }
-
+//ok
 StringPiece::size_type StringPiece::find_first_not_of(StringPiece s,
                                                       size_type pos) const {
   if (empty()) return npos;
   if (s.empty()) return 0;
   // Avoid the cost of BuildLookupTable() for a single-character search.
   if (s.length_ == 1) return find_first_not_of(s.ptr_[0], pos);
-
+  //任何未被显式初始化的数组元素均被零初始化，lookup所有元素都是0(false)
   bool lookup[UCHAR_MAX + 1] = { false };
   BuildLookupTable(s, lookup);
   for (size_type i = pos; i < length_; ++i) {
@@ -179,7 +181,7 @@ StringPiece::size_type StringPiece::find_first_not_of(StringPiece s,
   }
   return npos;
 }
-
+//ok
 StringPiece::size_type StringPiece::find_first_not_of(char c,
                                                       size_type pos) const {
   if (empty()) return npos;

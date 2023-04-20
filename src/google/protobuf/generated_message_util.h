@@ -90,6 +90,7 @@ inline To DownCast(From& f) {
 // It also generates less inlined code than a function-scope static initializer.
 PROTOBUF_EXPORT extern std::atomic<bool> init_protobuf_defaults_state;
 PROTOBUF_EXPORT void InitProtobufDefaultsSlow();
+//ok
 PROTOBUF_EXPORT inline void InitProtobufDefaults() {
   if (PROTOBUF_PREDICT_FALSE(
           !init_protobuf_defaults_state.load(std::memory_order_acquire))) {

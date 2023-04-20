@@ -119,6 +119,8 @@ static const char* kDefaultDirectDependenciesViolationMsg =
 // Returns true if the text looks like a Windows-style absolute path, starting
 // with a drive letter.  Example:  "C:\foo".  TODO(kenton):  Share this with
 // copy in importer.cc?
+//ok
+//是否是windows绝对路径
 static bool IsWindowsAbsolutePath(const std::string& text) {
 #if defined(_WIN32) || defined(__CYGWIN__)
   return text.size() >= 3 && text[1] == ':' && isalpha(text[0]) &&
@@ -148,6 +150,7 @@ void SetFdToBinaryMode(int fd) {
   // (Text and binary are the same on non-Windows platforms.)
 }
 
+//ok
 void AddTrailingSlash(std::string* path) {
   if (!path->empty() && path->at(path->size() - 1) != '/') {
     path->push_back('/');
@@ -192,6 +195,8 @@ bool TryCreateParentDirectory(const std::string& prefix,
 }
 
 // Get the absolute path of this protoc binary.
+//ok 
+//获取pb程序的绝对路径，例如"E:\\protobuf_build\\Debug\\protoc.exe"
 bool GetProtocAbsolutePath(std::string* path) {
 #ifdef _WIN32
   char buffer[MAX_PATH];
@@ -227,6 +232,7 @@ bool GetProtocAbsolutePath(std::string* path) {
 
 // Whether a path is where google/protobuf/descriptor.proto and other well-known
 // type protos are installed.
+//ok
 bool IsInstalledProtoPath(const std::string& path) {
   // Checking the descriptor.proto file should be good enough.
   std::string file_path = path + "/google/protobuf/descriptor.proto";
@@ -235,6 +241,8 @@ bool IsInstalledProtoPath(const std::string& path) {
 
 // Add the paths where google/protobuf/descriptor.proto and other well-known
 // type protos are installed.
+//ok
+//描述如上
 void AddDefaultProtoPaths(
     std::vector<std::pair<std::string, std::string>>* paths) {
   // TODO(xiaofeng): The code currently only checks relative paths of where
@@ -618,7 +626,7 @@ void CommandLineInterface::GeneratorContextImpl::GetOutputFilenames(
     output_filenames->push_back(pair.first);
   }
 }
-
+//ok
 io::ZeroCopyOutputStream* CommandLineInterface::GeneratorContextImpl::Open(
     const std::string& filename) {
   return new MemoryOutputStream(this, filename, false);
@@ -644,7 +652,7 @@ CommandLineInterface::GeneratorContextImpl::OpenForInsertWithGeneratedCodeInfo(
 }
 
 // -------------------------------------------------------------------
-
+//ok
 CommandLineInterface::MemoryOutputStream::MemoryOutputStream(
     GeneratorContextImpl* directory, const std::string& filename,
     bool append_mode)
@@ -652,7 +660,7 @@ CommandLineInterface::MemoryOutputStream::MemoryOutputStream(
       filename_(filename),
       append_mode_(append_mode),
       inner_(new io::StringOutputStream(&data_)) {}
-
+//ok
 CommandLineInterface::MemoryOutputStream::MemoryOutputStream(
     GeneratorContextImpl* directory, const std::string& filename,
     const std::string& insertion_point)
@@ -660,7 +668,7 @@ CommandLineInterface::MemoryOutputStream::MemoryOutputStream(
       filename_(filename),
       insertion_point_(insertion_point),
       inner_(new io::StringOutputStream(&data_)) {}
-
+//ok
 CommandLineInterface::MemoryOutputStream::MemoryOutputStream(
     GeneratorContextImpl* directory, const std::string& filename,
     const std::string& insertion_point, const google::protobuf::GeneratedCodeInfo& info)
@@ -942,7 +950,7 @@ bool ContainsProto3Optional(const Descriptor* desc) {
   }
   return false;
 }
-
+//daiding
 bool ContainsProto3Optional(const FileDescriptor* file) {
   if (file->syntax() == FileDescriptor::SYNTAX_PROTO3) {
     for (int i = 0; i < file->message_type_count(); i++) {
@@ -963,7 +971,6 @@ PopulateSingleSimpleDescriptorDatabase(const std::string& descriptor_set_name);
 
 int CommandLineInterface::Run(int argc, const char* const argv[]) {
   Clear();
-  //进度
   switch (ParseArguments(argc, argv)) {
     case PARSE_ARGUMENT_DONE_AND_EXIT:
       return 0;
@@ -973,6 +980,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
       break;
   }
 
+  //扫描input_files_，填入parsed_files
   std::vector<const FileDescriptor*> parsed_files;
   std::unique_ptr<DiskSourceTree> disk_source_tree;
   std::unique_ptr<ErrorPrinter> error_collector;
@@ -989,8 +997,8 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
 
   // Any --descriptor_set_in FileDescriptorSet objects will be used as a
   // fallback to input_files on command line, so create that db first.
-  //待定
   if (!descriptor_set_in_names_.empty()) {
+    //daiding
     for (const std::string& name : descriptor_set_in_names_) {
       std::unique_ptr<SimpleDescriptorDatabase> database_for_descriptor_set =
           PopulateSingleSimpleDescriptorDatabase(name);
@@ -1013,7 +1021,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
   }
 
   if (proto_path_.empty()) {
-      //待定
+    //daiding
     // If there are no --proto_path flags, then just look in the specified
     // --descriptor_set_in files.  But first, verify that the input files are
     // there.
@@ -1025,13 +1033,13 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
     descriptor_pool.reset(new DescriptorPool(descriptor_set_in_database.get(),
                                              error_collector.get()));
   } else {
-      //进度 default_delete   //进度，先学习一下模板
+     
     disk_source_tree.reset(new DiskSourceTree());
     if (!InitializeDiskSourceTree(disk_source_tree.get(),
                                   descriptor_set_in_database.get())) {
       return 1;
     }
-
+    
     error_collector.reset(
         new ErrorPrinter(error_format_, disk_source_tree.get()));
 
@@ -1045,11 +1053,11 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
   }
 
   descriptor_pool->EnforceWeakDependencies(true);
+  //jindu1
   if (!ParseInputFiles(descriptor_pool.get(), disk_source_tree.get(),
                        &parsed_files)) {
     return 1;
   }
-
 
   // We construct a separate GeneratorContext for each output location.  Note
   // that two code generators may output to the same location, in which case
@@ -1065,14 +1073,13 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
           !HasSuffixString(output_location, ".srcjar")) {
         AddTrailingSlash(&output_location);
       }
-
       auto& generator = output_directories[output_location];
 
       if (!generator) {
         // First time we've seen this output location.
         generator.reset(new GeneratorContextImpl(parsed_files));
       }
-
+      
       if (!GenerateOutput(parsed_files, output_directives_[i],
                           generator.get())) {
         return 1;
@@ -1158,11 +1165,13 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
 
   return 0;
 }
-
+//daiding
+//fallback_database：暂时看成是nullptr
+//source_tree：外层新对象的指针
+//例子：input_file由"C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"转换成了"wrappers.proto"
 bool CommandLineInterface::InitializeDiskSourceTree(
     DiskSourceTree* source_tree, DescriptorDatabase* fallback_database) {
   AddDefaultProtoPaths(&proto_path_);
-
   // Set up the source tree.
   for (int i = 0; i < proto_path_.size(); i++) {
     source_tree->MapPath(proto_path_[i].first, proto_path_[i].second);
@@ -1244,11 +1253,17 @@ bool CommandLineInterface::VerifyInputFilesInDescriptors(
   return true;
 }
 
+
+//扫描input_files_，填入parsed_files
+//DescriptorPool：外层新建对象指针
+//source_tree：外层新建对象指针
+//parsed_files：外层新建对象指针
 bool CommandLineInterface::ParseInputFiles(
     DescriptorPool* descriptor_pool, DiskSourceTree* source_tree,
     std::vector<const FileDescriptor*>* parsed_files) {
 
   if (!proto_path_.empty()) {
+  //daiding
     // Track unused imports in all source files that were loaded from the
     // filesystem. We do not track unused imports for files loaded from
     // descriptor sets as they may be programmatically generated in which case
@@ -1263,6 +1278,7 @@ bool CommandLineInterface::ParseInputFiles(
     // depending on the invocation. At least for invocations that are
     // exclusively reading from descriptor sets, we can eliminate this failure
     // condition.
+    //保存没有用到的import file的告警等级，true是error，false是warn
     for (const auto& input_file : input_files_) {
       descriptor_pool->AddUnusedImportTrackFile(input_file);
     }
@@ -1272,6 +1288,7 @@ bool CommandLineInterface::ParseInputFiles(
   // Parse each file.
   for (const auto& input_file : input_files_) {
     // Import the file.
+    //jindu2
     const FileDescriptor* parsed_file =
         descriptor_pool->FindFileByName(input_file);
     if (parsed_file == NULL) {
@@ -1280,6 +1297,7 @@ bool CommandLineInterface::ParseInputFiles(
     }
     parsed_files->push_back(parsed_file);
 
+    //daiding
     // Enforce --disallow_services.
     if (disallow_services_ && parsed_file->service_count() > 0) {
       std::cerr << parsed_file->name()
@@ -1290,7 +1308,7 @@ bool CommandLineInterface::ParseInputFiles(
       break;
     }
 
-
+    //daiding
     // Enforce --direct_dependencies
     if (direct_dependencies_explicitly_set_) {
       bool indirect_imports = false;
@@ -1311,10 +1329,12 @@ bool CommandLineInterface::ParseInputFiles(
       }
     }
   }
+  //daiding
   descriptor_pool->ClearUnusedImportTrackFiles();
+  //这里返回了true
   return result;
 }
-//先不管
+//daiding
 void CommandLineInterface::Clear() {
   // Clear all members that are set by Run().  Note that we must not clear
   // members which are set by other methods before Run() is called.
@@ -1339,6 +1359,11 @@ void CommandLineInterface::Clear() {
   deterministic_output_ = false;
 }
 
+//daiding
+//source_tree：外层新对象的指针
+//proto：将要编译的文件的路径
+//fallback_database：暂时看成是nullptr
+//例子：proto由"C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"转换成了"wrappers.proto"
 bool CommandLineInterface::MakeProtoProtoPathRelative(
     DiskSourceTree* source_tree, std::string* proto,
     DescriptorDatabase* fallback_database) {
@@ -1351,6 +1376,7 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
   // If the input file path is not a physical file path, it must be a virtual
   // path.
   if (access(proto->c_str(), F_OK) < 0) {
+  //daiding
     std::string disk_file;
     if (source_tree->VirtualFileToDiskFile(*proto, &disk_file) ||
         in_fallback_database) {
@@ -1361,7 +1387,7 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
       return false;
     }
   }
-
+  
   std::string virtual_file, shadowing_disk_file;
   switch (source_tree->DiskFileToVirtualFile(*proto, &virtual_file,
                                              &shadowing_disk_file)) {
@@ -1369,6 +1395,7 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
       *proto = virtual_file;
       break;
     case DiskSourceTree::SHADOWED:
+    //daiding
       std::cerr << *proto << ": Input is shadowed in the --proto_path by \""
                 << shadowing_disk_file
                 << "\".  Either use the latter file as your input or reorder "
@@ -1377,6 +1404,7 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
                 << std::endl;
       return false;
     case DiskSourceTree::CANNOT_OPEN: {
+    //daiding
       if (in_fallback_database) {
         return true;
       }
@@ -1388,6 +1416,7 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
       return false;
     }
     case DiskSourceTree::NO_MAPPING: {
+    //daiding
       // Try to interpret the path as a virtual path.
       std::string disk_file;
       if (source_tree->VirtualFileToDiskFile(*proto, &disk_file) ||
@@ -1412,7 +1441,10 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
   }
   return true;
 }
-
+//daiding
+//fallback_database：暂时看成是nullptr
+//source_tree：外层新对象的指针
+//例子：input_file由"C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"转换成了"wrappers.proto"
 bool CommandLineInterface::MakeInputsBeProtoPathRelative(
     DiskSourceTree* source_tree, DescriptorDatabase* fallback_database) {
   for (auto& input_file : input_files_) {
@@ -1447,10 +1479,9 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
   executable_name_ = argv[0];
 
   std::vector<std::string> arguments;
-  //待定
   for (int i = 1; i < argc; ++i) {
-    //待定
     if (argv[i][0] == '@') {
+    //daiding，如果需要扩展才执行
       if (!ExpandArgumentFile(argv[i] + 1, &arguments)) {
         std::cerr << "Failed to open argument file: " << (argv[i] + 1)
                   << std::endl;
@@ -1458,6 +1489,7 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
       }
       continue;
     }
+    //装填arguments
     arguments.push_back(argv[i]);
   }
 
@@ -1466,7 +1498,11 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
     PrintHelpText();
     return PARSE_ARGUMENT_DONE_AND_EXIT;  // Exit without running compiler.
   }
-
+  //例子：-I=C:\Users\Tim\Desktop\input\ --cpp_out=C:\Users\Tim\Desktop\test C:\Users\Tim\Desktop\input\wrappers.proto
+  //argv[0]："-I=C:\\Users\\Tim\\Desktop\\input\\"
+  //argv[1]："--cpp_out=C:\\Users\\Tim\\Desktop\\test"
+  //argv[2]："C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"
+  
   // Iterate through all arguments and parse them.
   for (int i = 0; i < arguments.size(); ++i) {
     std::string name, value;
@@ -1494,7 +1530,7 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
     if (status != PARSE_ARGUMENT_DONE_AND_CONTINUE) return status;
   }
   // Make sure each plugin option has a matching plugin output.
-  //待定
+  //daiding plugin相关
   bool foundUnknownPluginOption = false;
   for (std::map<std::string, std::string>::const_iterator i =
            plugin_parameters_.begin();
@@ -1529,12 +1565,14 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
   // The --proto_path & --descriptor_set_in flags both specify places to look
   // for proto files. If neither were given, use the current working directory.
   if (proto_path_.empty() && descriptor_set_in_names_.empty()) {
+  //daiding
     // Don't use make_pair as the old/default standard library on Solaris
     // doesn't support it without explicit template parameters, which are
     // incompatible with C++0x's make_pair.
     proto_path_.push_back(std::pair<std::string, std::string>("", "."));
   }
 
+  //以下待定
   // Check error cases that span multiple flag values.
   bool missing_proto_definitions = false;
   switch (mode_) {
@@ -1602,7 +1640,8 @@ CommandLineInterface::ParseArgumentStatus CommandLineInterface::ParseArguments(
 
   return PARSE_ARGUMENT_DONE_AND_CONTINUE;
 }
-//ok
+//daiding
+//arg：argv参数
 bool CommandLineInterface::ParseArgument(const char* arg, std::string* name,
                                          std::string* value) {
   bool parsed_value = false;
@@ -1617,6 +1656,7 @@ bool CommandLineInterface::ParseArgument(const char* arg, std::string* name,
     //   value.
     const char* equals_pos = strchr(arg, '=');
     if (equals_pos != NULL) {
+    //例如name为"--cpp_out"，value为"C:\\Users\\Tim\\Desktop\\test"
       *name = std::string(arg, equals_pos - arg);
       *value = equals_pos + 1;
       parsed_value = true;
@@ -1627,12 +1667,16 @@ bool CommandLineInterface::ParseArgument(const char* arg, std::string* name,
     // One dash:  One-character name, all subsequent characters are the
     //   value.
     if (arg[1] == '\0') {
+    //daiding
       // arg is just "-".  We treat this as an input file, except that at
       // present this will just lead to a "file not found" error.
       name->clear();
       *value = arg;
       parsed_value = true;
     } else {
+    //例如-I=C:\\Users\\Tim\\Desktop\\test;C:\\Users\\Tim\\Desktop\\test1
+    //name -I
+    //value =C:\\Users\\Tim\\Desktop\\test;C:\\Users\\Tim\\Desktop\\test1
       *name = std::string(arg, 2);
       *value = arg + 2;
       parsed_value = !value->empty();
@@ -1662,7 +1706,7 @@ bool CommandLineInterface::ParseArgument(const char* arg, std::string* name,
   // Next argument is the flag value.
   return true;
 }
-//ok
+//daiding
 CommandLineInterface::ParseArgumentStatus
 CommandLineInterface::InterpretArgument(const std::string& name,
                                         const std::string& value) {
@@ -1680,7 +1724,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       return PARSE_ARGUMENT_FAIL;
     }
 
-    //ok wildcards待定，主要作用是把value填到input_files_
+    //daiding 先展开通配符，再将输入文件路径填入input_files_
 #if defined(_WIN32)
     // On Windows, the shell (typically cmd.exe) does not expand wildcards in
     // file names (e.g. foo\*.proto), so we do it ourselves.
@@ -1708,11 +1752,9 @@ CommandLineInterface::InterpretArgument(const std::string& name,
 #endif  // _WIN32
     //ok  获取依赖的.proto文件，填入proto_path_
   } else if (name == "-I" || name == "--proto_path") {
-    //依赖的.proto文件
     // Java's -classpath (and some other languages) delimits path components
     // with colons.  Let's accept that syntax too just to make things more
     // intuitive.
-      //理解意思就好，暂不要深入
     std::vector<std::string> parts = Split(
         value, CommandLineInterface::kPathSeparator,
         true);
@@ -1737,6 +1779,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
             << std::endl;
         return PARSE_ARGUMENT_FAIL;
       }
+      //daiding
       // Make sure disk path exists, warn otherwise.
       if (access(disk_path.c_str(), F_OK) < 0) {
         // Try the original path; it may have just happened to have a '=' in it.
@@ -1752,6 +1795,9 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       // Don't use make_pair as the old/default standard library on Solaris
       // doesn't support it without explicit template parameters, which are
       // incompatible with C++0x's make_pair.
+      //对于-I=C:\Users\Tim\Desktop\input\
+      //virtual_path为""
+      //disk_path为"C:\\Users\\Tim\\Desktop\\input\\"
       proto_path_.push_back(
           std::pair<std::string, std::string>(virtual_path, disk_path));
     }
@@ -1960,7 +2006,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
         FindOrNull(generators_by_flag_name_, name);
     if (generator_info == NULL &&
         (plugin_prefix_.empty() || !HasSuffixString(name, "_out"))) {
-        //待定
+        //dading
       // Check if it's a generator option flag.
       generator_info = FindOrNull(generators_by_option_name_, name);
       if (generator_info != NULL) {
@@ -1984,6 +2030,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
     } else {
       // It's an output flag.  Add it to the output directives.
       if (mode_ != MODE_COMPILE) {
+      //daiding
         std::cerr << "Cannot use --encode, --decode or print .proto info and "
                      "generate code at the same time."
                   << std::endl;
@@ -1991,11 +2038,12 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       }
 
       OutputDirective directive;
+      //例如："--cpp_out"
       directive.name = name;
       if (generator_info == NULL) {
         directive.generator = NULL;
       } else {
-          //这里获取到生成器
+      //对于--cpp_out，为cpp::CppGenerator
         directive.generator = generator_info->generator;
       }
 
@@ -2004,7 +2052,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       // Windows-style absolute path.
       std::string::size_type colon_pos = value.find_first_of(':');
       if (colon_pos == std::string::npos || IsWindowsAbsolutePath(value)) {
-          //这里获取到生成路径
+          //例如："C:\\Users\\Tim\\Desktop\\test"
         directive.output_location = value;
       } else {
         directive.parameter = value.substr(0, colon_pos);
@@ -2095,7 +2143,7 @@ Parse PROTO_FILES and generate output based on the options given:
                               is mapped to the given executable even if
                               the executable's own name differs.)";
   }
-
+  //generators_by_flag_name_在main函数的开头已经注册了
   for (GeneratorMap::iterator iter = generators_by_flag_name_.begin();
        iter != generators_by_flag_name_.end(); ++iter) {
     // FIXME(kenton):  If the text is long enough it will wrap, which is ugly,
@@ -2122,7 +2170,8 @@ Parse PROTO_FILES and generate output based on the options given:
                               even if it contains spaces.)";
   std::cout << std::endl;
 }
-
+//codegen_name，例如--cpp_out
+//daiding
 bool CommandLineInterface::EnforceProto3OptionalSupport(
     const std::string& codegen_name, uint64_t supported_features,
     const std::vector<const FileDescriptor*>& parsed_files) const {
@@ -2144,7 +2193,9 @@ bool CommandLineInterface::EnforceProto3OptionalSupport(
   }
   return true;
 }
-
+//parsed_files：可以理解为将要编译的文件
+//output_directive：编译驱动，每种语言有一个
+//generator_context：上下文
 bool CommandLineInterface::GenerateOutput(
     const std::vector<const FileDescriptor*>& parsed_files,
     const OutputDirective& output_directive,
@@ -2152,6 +2203,7 @@ bool CommandLineInterface::GenerateOutput(
   // Call the generator.
   std::string error;
   if (output_directive.generator == NULL) {
+  //daiding
     // This is a plugin.
     GOOGLE_CHECK(HasPrefixString(output_directive.name, "--") &&
           HasSuffixString(output_directive.name, "_out"))
@@ -2171,6 +2223,7 @@ bool CommandLineInterface::GenerateOutput(
       return false;
     }
   } else {
+
     // Regular generator.
     std::string parameters = output_directive.parameter;
     if (!generator_parameters_[output_directive.name].empty()) {
@@ -2179,9 +2232,11 @@ bool CommandLineInterface::GenerateOutput(
       }
       parameters.append(generator_parameters_[output_directive.name]);
     }
+    
     if (!EnforceProto3OptionalSupport(
             output_directive.name,
             output_directive.generator->GetSupportedFeatures(), parsed_files)) {
+    //daiding
       return false;
     }
 

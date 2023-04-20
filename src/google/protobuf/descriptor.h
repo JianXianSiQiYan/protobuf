@@ -2024,6 +2024,7 @@ class PROTOBUF_EXPORT DescriptorPool {
 
   // Set of files to track for unused imports. The bool value when true means
   // unused imports are treated as errors (and as warnings when false).
+  //保存没有用到的import file的告警等级，true是error，false是warn
   std::map<std::string, bool> unused_import_track_files_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(DescriptorPool);

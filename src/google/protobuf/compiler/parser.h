@@ -219,6 +219,7 @@ class PROTOBUF_EXPORT Parser {
   // are recorded -- the constructor records the start location and the
   // destructor records the end location.  Since the parser is
   // recursive-descent, this works out beautifully.
+  //daiding
   class PROTOBUF_EXPORT LocationRecorder {
    public:
     // Construct the file's "root" location.
@@ -532,8 +533,11 @@ class PROTOBUF_EXPORT Parser {
   SourceCodeInfo* source_code_info_;
   SourceLocationTable* source_location_table_;  // legacy
   bool had_errors_;
+  //只有FT会用到，默认false
   bool require_syntax_identifier_;
+  //是否检测到syntax identifier就不再继续
   bool stop_after_syntax_identifier_;
+  //在扫描syntax后，会把内容填入syntax_identifier_
   std::string syntax_identifier_;
 
   // Leading doc comments for the next declaration.  These are not complete

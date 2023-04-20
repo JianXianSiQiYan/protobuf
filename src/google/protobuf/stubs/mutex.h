@@ -94,6 +94,7 @@ class PROTOBUF_EXPORT CriticalSectionLock {
 
 // In MSVC std::mutex does not have a constexpr constructor.
 // This wrapper makes the constructor constexpr.
+//ok
 template <typename T>
 class CallOnceInitializedMutex {
  public:
@@ -116,6 +117,7 @@ class CallOnceInitializedMutex {
 // Mutex is a natural type to wrap. As both google and other organization have
 // specialized mutexes. gRPC also provides an injection mechanism for custom
 // mutexes.
+//ok
 class GOOGLE_PROTOBUF_CAPABILITY("mutex") PROTOBUF_EXPORT WrappedMutex {
  public:
 #if defined(__QNX__)

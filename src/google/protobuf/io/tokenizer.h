@@ -333,6 +333,7 @@ class PROTOBUF_EXPORT Tokenizer {
   inline void EndToken();
 
   // Convenience method to add an error at the current line and column.
+  //daiding
   void AddError(const std::string& message) {
     error_collector_->AddError(line_, column_, message);
   }
@@ -424,7 +425,7 @@ class PROTOBUF_EXPORT Tokenizer {
 inline const Tokenizer::Token& Tokenizer::current() { return current_; }
 
 inline const Tokenizer::Token& Tokenizer::previous() { return previous_; }
-
+//ok
 inline void Tokenizer::ParseString(const std::string& text,
                                    std::string* output) {
   output->clear();

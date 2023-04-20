@@ -72,7 +72,7 @@ float SafeDoubleToFloat(double value) {
     return static_cast<float>(value);
   }
 }
-
+//ok
 double NoLocaleStrtod(const char* str, char** endptr) {
   return google::protobuf::internal::NoLocaleStrtod(str, endptr);
 }

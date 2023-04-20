@@ -64,7 +64,7 @@ namespace protobuf {
 // ascii_isspace()
 //    Check if the character is a space character.
 // ----------------------------------------------------------------------
-
+//ok
 inline bool ascii_isalnum(char c) {
   return ('a' <= c && c <= 'z') ||
          ('A' <= c && c <= 'Z') ||
@@ -113,6 +113,8 @@ inline int hex_digit_to_int(char c) {
 //    prefix string if the prefix matches, otherwise the original
 //    string.
 // ----------------------------------------------------------------------
+//ok
+//是否有前缀
 inline bool HasPrefixString(StringPiece str, StringPiece prefix) {
   return str.size() >= prefix.size() &&
          memcmp(str.data(), prefix.data(), prefix.size()) == 0;
@@ -135,12 +137,14 @@ inline std::string StripPrefixString(const std::string& str,
 //    suffix string if the suffix matches, otherwise the original
 //    string.
 // ----------------------------------------------------------------------
+//ok
+//是否有后缀
 inline bool HasSuffixString(StringPiece str, StringPiece suffix) {
   return str.size() >= suffix.size() &&
          memcmp(str.data() + str.size() - suffix.size(), suffix.data(),
                 suffix.size()) == 0;
 }
-
+//ok
 inline std::string StripSuffixString(const std::string& str,
                                      const std::string& suffix) {
   if (HasSuffixString(str, suffix)) {
@@ -235,6 +239,7 @@ PROTOBUF_EXPORT void SplitStringAllowEmpty(StringPiece full, const char* delim,
 // Split()
 //    Split a string using a character delimiter.
 // ----------------------------------------------------------------------
+//ok
 inline std::vector<std::string> Split(StringPiece full, const char* delim,
                                       bool skip_empty = true) {
   std::vector<std::string> result;
@@ -593,7 +598,7 @@ enum PadSpec {
   ZERO_PAD_15,
   ZERO_PAD_16,
 };
-
+//ok
 struct Hex {
   uint64 value;
   enum PadSpec spec;
@@ -615,7 +620,9 @@ struct Hex {
 };
 
 struct PROTOBUF_EXPORT AlphaNum {
+    //数字转成字符串后的头指针
   const char *piece_data_;  // move these to string_ref eventually
+    //数字转成字符串后的大小
   size_t piece_size_;       // move these to string_ref eventually
 
   char digits[kFastToBufferSize];

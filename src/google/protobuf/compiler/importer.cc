@@ -70,6 +70,8 @@ using google::protobuf::io::win32::open;
 // Returns true if the text looks like a Windows-style absolute path, starting
 // with a drive letter.  Example:  "C:\foo".  TODO(kenton):  Share this with
 // copy in command_line_interface.cc?
+//ok
+//是否是windows系统的绝对路径
 static bool IsWindowsAbsolutePath(const std::string& text) {
 #if defined(_WIN32) || defined(__CYGWIN__)
   return text.size() >= 3 && text[1] == ':' && isalpha(text[0]) &&
@@ -131,10 +133,13 @@ SourceTreeDescriptorDatabase::SourceTreeDescriptorDatabase(
 
 SourceTreeDescriptorDatabase::~SourceTreeDescriptorDatabase() {}
 
+//output：外层新建对象
+//filename：将要编译文件
 bool SourceTreeDescriptorDatabase::FindFileByName(const std::string& filename,
                                                   FileDescriptorProto* output) {
   std::unique_ptr<io::ZeroCopyInputStream> input(source_tree_->Open(filename));
   if (input == NULL) {
+  //daiding
     if (fallback_database_ != nullptr &&
         fallback_database_->FindFileByName(filename, output)) {
       return true;
@@ -274,6 +279,8 @@ static inline char LastChar(const std::string& str) {
 //   then if foo/bar is a symbolic link, foo/bar/baz.proto will canonicalize
 //   to a path which does not appear to be under foo, and thus the compiler
 //   will complain that baz.proto is not inside the --proto_path.
+//ok
+//将path修改成标准格式
 static std::string CanonicalizePath(std::string path) {
 #ifdef _WIN32
   // The Win32 API accepts forward slashes as a path delimiter even though
@@ -309,7 +316,8 @@ static std::string CanonicalizePath(std::string path) {
   }
   return result;
 }
-
+//ok
+//是否包含..的格式
 static inline bool ContainsParentReference(const std::string& path) {
   return path == ".." || HasPrefixString(path, "../") ||
          HasSuffixString(path, "/..") || path.find("/../") != std::string::npos;
@@ -331,7 +339,9 @@ static inline bool ContainsParentReference(const std::string& path) {
 //
 //   assert(!ApplyMapping("foo/bar", "baz", "qux", &result));
 //   assert(!ApplyMapping("foo/bar", "baz", "qux", &result));
-//   assert(!ApplyMapping("foobar", "foo", "baz", &result));
+//   assert(!ApplyMapping("foobar", "foo", "baz", &result
+//ok
+//改造filename，old_prefix替换成new_prefix，结果保存在result
 static bool ApplyMapping(const std::string& filename,
                          const std::string& old_prefix,
                          const std::string& new_prefix, std::string* result) {
@@ -345,6 +355,7 @@ static bool ApplyMapping(const std::string& filename,
       // This is an absolute path, so it isn't matched by the empty string.
       return false;
     }
+    //如果old_prefix为空，则把new_prefix添加到filename开头
     result->assign(new_prefix);
     if (!result->empty()) result->push_back('/');
     result->append(filename);
@@ -353,6 +364,7 @@ static bool ApplyMapping(const std::string& filename,
     // old_prefix is a prefix of the filename.  Is it the whole filename?
     if (filename.size() == old_prefix.size()) {
       // Yep, it's an exact match.
+      //相当于完全替换成new_prefix
       *result = new_prefix;
       return true;
     } else {
@@ -361,8 +373,10 @@ static bool ApplyMapping(const std::string& filename,
       // does not match the filename "foo/barbaz".
       int after_prefix_start = -1;
       if (filename[old_prefix.size()] == '/') {
+      //old_prefix最后一个字符不是'/'
         after_prefix_start = old_prefix.size() + 1;
       } else if (filename[old_prefix.size() - 1] == '/') {
+        //old_prefix最后一个字符是'/'
         // old_prefix is never empty, and canonicalized paths never have
         // consecutive '/' characters.
         after_prefix_start = old_prefix.size();
@@ -385,12 +399,17 @@ static bool ApplyMapping(const std::string& filename,
 
   return false;
 }
-
+//ok
+//把一些(virtual_path,disk_path)队添加到mappings_
 void DiskSourceTree::MapPath(const std::string& virtual_path,
                              const std::string& disk_path) {
   mappings_.push_back(Mapping(virtual_path, CanonicalizePath(disk_path)));
 }
-
+//daiding
+//disk_file使用ApplyMapping转换，结果存储于virtual_file
+//disk_file：将要编译的文件
+//virtual_file：外层新建对象
+//shadowing_disk_file：外层新建对象
 DiskSourceTree::DiskFileToVirtualFileResult
 DiskSourceTree::DiskFileToVirtualFile(const std::string& disk_file,
                                       std::string* virtual_file,
@@ -411,10 +430,10 @@ DiskSourceTree::DiskFileToVirtualFile(const std::string& disk_file,
   if (mapping_index == -1) {
     return NO_MAPPING;
   }
-
   // Iterate through all mappings with higher precedence and verify that none
   // of them map this file to some other existing file.
   for (int i = 0; i < mapping_index; i++) {
+  //daiding
     if (ApplyMapping(*virtual_file, mappings_[i].virtual_path,
                      mappings_[i].disk_path, shadowing_disk_file)) {
       if (access(shadowing_disk_file->c_str(), F_OK) >= 0) {
@@ -435,7 +454,9 @@ DiskSourceTree::DiskFileToVirtualFile(const std::string& disk_file,
 
   return SUCCESS;
 }
-
+//ok
+//virtual_file：将要编译的文件名
+//如OpenVirtualFile
 bool DiskSourceTree::VirtualFileToDiskFile(const std::string& virtual_file,
                                            std::string* disk_file) {
   std::unique_ptr<io::ZeroCopyInputStream> stream(
@@ -450,7 +471,10 @@ io::ZeroCopyInputStream* DiskSourceTree::Open(const std::string& filename) {
 std::string DiskSourceTree::GetLastErrorMessage() {
   return last_error_message_;
 }
-
+//ok
+//virtual_file：将要编译的文件名
+//disk_file：将virtual_file文件头改造后的文件名
+//将virtual_file改造文件头，保存在disk_file，打开改造文件名后的文件
 io::ZeroCopyInputStream* DiskSourceTree::OpenVirtualFile(
     const std::string& virtual_file, std::string* disk_file) {
   if (virtual_file != CanonicalizePath(virtual_file) ||
@@ -487,7 +511,8 @@ io::ZeroCopyInputStream* DiskSourceTree::OpenVirtualFile(
   last_error_message_ = "File not found.";
   return NULL;
 }
-
+//ok
+//打开文件路径filename所指文件
 io::ZeroCopyInputStream* DiskSourceTree::OpenDiskFile(
     const std::string& filename) {
   struct stat sb;

@@ -45,7 +45,8 @@ namespace protobuf {
 namespace compiler {
 
 CodeGenerator::~CodeGenerator() {}
-
+//files：将要编译的参数
+//parameter：编译选项
 bool CodeGenerator::GenerateAll(const std::vector<const FileDescriptor*>& files,
                                 const std::string& parameter,
                                 GeneratorContext* generator_context,
@@ -55,6 +56,7 @@ bool CodeGenerator::GenerateAll(const std::vector<const FileDescriptor*>& files,
   bool succeeded = true;
   for (int i = 0; i < files.size(); i++) {
     const FileDescriptor* file = files[i];
+    
     succeeded = Generate(file, parameter, generator_context, error);
     if (!succeeded && error && error->empty()) {
       *error =
@@ -124,6 +126,7 @@ void ParseGeneratorParameter(
 }
 
 // Strips ".proto" or ".protodevel" from the end of a filename.
+//ok
 std::string StripProto(const std::string& filename) {
   if (HasSuffixString(filename, ".protodevel")) {
     return StripSuffixString(filename, ".protodevel");

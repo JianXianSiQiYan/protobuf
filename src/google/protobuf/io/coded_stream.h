@@ -415,7 +415,8 @@ class PROTOBUF_EXPORT CodedInputStream {
   // Sets the maximum recursion depth.  The default is 100.
   void SetRecursionLimit(int limit);
   int RecursionBudget() { return recursion_budget_; }
-
+  //ok
+  //¹Ì¶¨Öµ100
   static int GetDefaultRecursionLimit() { return default_recursion_limit_; }
 
   // Increments the current recursion depth.  Returns true if the depth is

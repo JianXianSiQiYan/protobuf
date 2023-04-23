@@ -243,6 +243,8 @@ class PROTOBUF_EXPORT MessageLite {
   // to hold parts of the message will be needed again to hold the next
   // message.  If you actually want to free the memory used by a Message,
   // you must delete it.
+  //ok
+  //清除所有字段，将它们设置为默认值
   virtual void Clear() = 0;
 
   // Quickly check if all required fields have values set.
@@ -591,10 +593,11 @@ bool MergeFromImpl(const SourceWrapper<T>& input, MessageLite* msg,
 }
 
 }  // namespace internal
-
+//T例子：StringPiece
 template <MessageLite::ParseFlags flags, typename T>
 bool MessageLite::ParseFrom(const T& input) {
   if (flags & kParse) Clear();
+  //jindu13 kMergeWithAliasing不知道是什么
   constexpr bool alias = (flags & kMergeWithAliasing) != 0;
   return internal::MergeFromImpl<alias>(input, this, flags);
 }

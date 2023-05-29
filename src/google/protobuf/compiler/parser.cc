@@ -194,7 +194,7 @@ Parser::~Parser() {}
 
 // ===================================================================
 //ok
-//当前token的名字是否等于text
+//当前Token的名字是否等于text
 inline bool Parser::LookingAt(const char* text) {
   return input_->current().text == text;
 }
@@ -448,19 +448,23 @@ Parser::LocationRecorder::LocationRecorder(const LocationRecorder& parent,
   AddPath(path1);
   AddPath(path2);
 }
-
+//ok
+//使用parent进行初始化
 void Parser::LocationRecorder::Init(const LocationRecorder& parent,
                                     SourceCodeInfo* source_code_info) {
   parser_ = parent.parser_;
   source_code_info_ = source_code_info;
-
+  //location_设置添加的location
   location_ = source_code_info_->add_location();
+  //把path复制过来
   location_->mutable_path()->CopyFrom(parent.location_->path());
-
+  //添加行号和列号
   location_->add_span(parser_->input_->current().line);
   location_->add_span(parser_->input_->current().column);
 }
-//没有主动调用EndAt，那么记录就在上一个token结束？
+//ok
+//current token被扫出来后并未被使用，所以要用previous token
+//使用previous token的信息来标记location的结束
 Parser::LocationRecorder::~LocationRecorder() {
   if (location_->span_size() <= 2) {
     EndAt(parser_->input_->previous());
@@ -480,7 +484,9 @@ void Parser::LocationRecorder::StartAt(const LocationRecorder& other) {
   location_->set_span(0, other.location_->span(0));
   location_->set_span(1, other.location_->span(1));
 }
-
+//ok
+//使用token来标记location的span
+//span:start line, start column, end line (optional, otherwise assumed same as start line), end column.
 void Parser::LocationRecorder::EndAt(const io::Tokenizer::Token& token) {
   if (token.line != location_->span(0)) {
     location_->add_span(token.line);
@@ -1491,7 +1497,6 @@ bool Parser::ParseUninterpretedBlock(std::string* value) {
 //options：新增的options消息，此函数会往里面填内容
 //options_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-//jindu10
 bool Parser::ParseOption(Message* options,
                          const LocationRecorder& options_location,
                          const FileDescriptorProto* containing_file,
@@ -2022,7 +2027,6 @@ bool Parser::ParseOneof(OneofDescriptorProto* oneof_decl,
 //enum_type：新增的enum，此函数会往里面填内容
 //enum_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-//jindu7
 bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
                                  const LocationRecorder& enum_location,
                                  const FileDescriptorProto* containing_file) {
@@ -2046,7 +2050,6 @@ bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
 //enum_type：新增的enum，此函数会往里面填内容
 //enum_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-//jindu8
 bool Parser::ParseEnumBlock(EnumDescriptorProto* enum_type,
                             const LocationRecorder& enum_location,
                             const FileDescriptorProto* containing_file) {
@@ -2071,7 +2074,6 @@ bool Parser::ParseEnumBlock(EnumDescriptorProto* enum_type,
 //enum_type：新增的enum，此函数会往里面填内容
 //enum_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-//jindu9
 bool Parser::ParseEnumStatement(EnumDescriptorProto* enum_type,
                                 const LocationRecorder& enum_location,
                                 const FileDescriptorProto* containing_file) {

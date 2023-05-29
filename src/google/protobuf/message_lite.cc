@@ -134,7 +134,6 @@ void MessageLite::LogInitializationErrorMessage() const {
 }
 
 namespace internal {
-//jindu14
 template <bool aliasing>
 bool MergeFromImpl(StringPiece input, MessageLite* msg,
                    MessageLite::ParseFlags parse_flags) {

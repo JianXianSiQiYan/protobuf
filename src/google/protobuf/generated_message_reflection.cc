@@ -2943,7 +2943,6 @@ void AssignDescriptorsImpl(const DescriptorTable* table, bool eager) {
   MetadataOwner::Instance()->AddArray(table->file_level_metadata,
                                       helper.GetCurrentMetadataPtr());
 }
-//jindu12
 //table£ºdescriptor_table_google_2fprotobuf_2fdescriptor_2eproto
 void AddDescriptorsImpl(const DescriptorTable* table) {
   // Reflection refers to the default fields so make sure they are initialized.
@@ -2987,7 +2986,6 @@ void RegisterAllTypesInternal(const Metadata* file_level_metadata, int size) {
 }
 
 namespace internal {
-//jindu11
 Metadata AssignDescriptors(const DescriptorTable* (*table)(),
                            internal::once_flag* once,
                            const Metadata& metadata) {

@@ -597,7 +597,6 @@ bool MergeFromImpl(const SourceWrapper<T>& input, MessageLite* msg,
 template <MessageLite::ParseFlags flags, typename T>
 bool MessageLite::ParseFrom(const T& input) {
   if (flags & kParse) Clear();
-  //jindu13 kMergeWithAliasing不知道是什么
   constexpr bool alias = (flags & kMergeWithAliasing) != 0;
   return internal::MergeFromImpl<alias>(input, this, flags);
 }

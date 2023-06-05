@@ -301,14 +301,14 @@ void Tokenizer::Refresh() {
   current_char_ = buffer_[0];
 }
 //ok
-//开始记录token，保存在target
+//开始记录token，与RecordTo配套使用，将RecordTo与StopRecording间的字符保存在target
 inline void Tokenizer::RecordTo(std::string* target) {
   record_target_ = target;
   record_start_ = buffer_pos_;
 }
 
 //ok
-//结束记录token
+//结束记录token，与RecordTo配套使用，将RecordTo与StopRecording间的字符保存在record_target_
 inline void Tokenizer::StopRecording() {
   // Note:  The if() is necessary because some STL implementations crash when
   //   you call string::append(NULL, 0), presumably because they are trying to
@@ -355,7 +355,7 @@ inline bool Tokenizer::TryConsumeOne() {
   }
 }
 //ok
-//如果current_char_是c，更新下一个字符到current_char_
+//如果current_char_是c，更新下一个字符到current_char_，否则什么也不做
 inline bool Tokenizer::TryConsume(char c) {
   if (current_char_ == c) {
     NextChar();
@@ -515,7 +515,7 @@ Tokenizer::TokenType Tokenizer::ConsumeNumber(bool started_with_zero,
   return is_float ? TYPE_FLOAT : TYPE_INTEGER;
 }
 //ok
-//匹配注释行，保存于content
+//匹配行注释，保存于content
 void Tokenizer::ConsumeLineComment(std::string* content) {
   if (content != NULL) RecordTo(content);
 
@@ -528,6 +528,7 @@ void Tokenizer::ConsumeLineComment(std::string* content) {
 }
 
 //ok
+//匹配块注释，保存于content
 void Tokenizer::ConsumeBlockComment(std::string* content) {
   int start_line = line_;
   int start_column = column_ - 2;
@@ -577,6 +578,7 @@ void Tokenizer::ConsumeBlockComment(std::string* content) {
 }
 //ok
 //把注释的开头吃掉，判断是哪种注释类型
+//返回值：注释类型
 Tokenizer::NextCommentStatus Tokenizer::TryConsumeCommentStart() {
   if (comment_style_ == CPP_COMMENT_STYLE && TryConsume('/')) {
     if (TryConsume('/')) {
@@ -769,6 +771,7 @@ class CommentCollector {
   // About to read a line comment.  Get the comment buffer pointer in order to
   // read into it.
   //ok
+  //返回comment_buffer_，准备用于扫描行注释，返回前适时清除历史注释
   std::string* GetBufferForLineComment() {
     // We want to combine with previous line comments, but not block comments.
     if (has_comment_ && !is_line_comment_) {
@@ -782,6 +785,7 @@ class CommentCollector {
   // About to read a block comment.  Get the comment buffer pointer in order to
   // read into it.
   //ok
+  //返回comment_buffer_，准备用于扫描行注释，返回前适时清除历史注释
   std::string* GetBufferForBlockComment() {
     if (has_comment_) {
     //块注释不做拼接，直接Flush
@@ -835,11 +839,16 @@ class CommentCollector {
 
   // Is it still possible that we could be reading a comment attached to the
   // previous token?
+  //Flush()的时候，comment_buffer_是否添加到prev_trailing_comments_
   bool can_attach_to_prev_;
 };
 
 }  // namespace
 //ok
+//大概理解，处理注释，直到拿到不是注释的字符
+//prev_trailing_comments：当can_attach_to_prev_为true时，第一次Flush会把comment_buffer_添加到prev_trailing_comments
+//detached_comments：当Flush时，如果不是添加到prev_trailing_comments的情况，则添加到detached_comments
+//next_leading_comments：当CommentCollector消亡时，将comment_buffer_添加到next_leading_comments
 bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
                                  std::vector<std::string>* detached_comments,
                                  std::string* next_leading_comments) {
@@ -862,7 +871,6 @@ bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
   } else {
     // A comment appearing on the same line must be attached to the previous
     // declaration.
-    //daiding 这种情形不知道用来干嘛的，函数调用处的前面是非注释的token？
     ConsumeZeroOrMore<WhitespaceNoNewline>();
     switch (TryConsumeCommentStart()) {
       case LINE_COMMENT:
@@ -870,6 +878,7 @@ bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
 
         // Don't allow comments on subsequent lines to be attached to a trailing
         // comment.
+        //注释行或者添加到prev_trailing_comments_，或者加入detached_comments_
         collector.Flush();
         break;
       case BLOCK_COMMENT:
@@ -879,7 +888,7 @@ bool Tokenizer::NextWithComments(std::string* prev_trailing_comments,
         if (!TryConsume('\n')) {
           // Oops, the next token is on the same line.  If we recorded a comment
           // we really have no idea which token it should be attached to.
-          //daiding
+          //注释丢弃掉
           collector.ClearBuffer();
           return Next();
         }

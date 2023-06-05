@@ -133,8 +133,9 @@ SourceTreeDescriptorDatabase::SourceTreeDescriptorDatabase(
 
 SourceTreeDescriptorDatabase::~SourceTreeDescriptorDatabase() {}
 
-//output：外层新建对象
+//output：外层新建对象指针
 //filename：将要编译文件
+//jindu4
 bool SourceTreeDescriptorDatabase::FindFileByName(const std::string& filename,
                                                   FileDescriptorProto* output) {
   std::unique_ptr<io::ZeroCopyInputStream> input(source_tree_->Open(filename));
@@ -165,6 +166,7 @@ bool SourceTreeDescriptorDatabase::FindFileByName(const std::string& filename,
 
   // Parse it.
   output->set_name(filename);
+  //jindu5
   return parser.Parse(&tokenizer, output) && !file_error_collector.had_errors();
 }
 

@@ -1255,7 +1255,7 @@ bool CommandLineInterface::VerifyInputFilesInDescriptors(
 
 
 //扫描input_files_，填入parsed_files
-//DescriptorPool：外层新建对象指针
+//descriptor_pool：外层新建对象指针
 //source_tree：外层新建对象指针
 //parsed_files：外层新建对象指针
 bool CommandLineInterface::ParseInputFiles(

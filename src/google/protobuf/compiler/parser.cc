@@ -123,7 +123,7 @@ bool IsLowercase(char c) { return c >= 'a' && c <= 'z'; }
 bool IsNumber(char c) { return c >= '0' && c <= '9'; }
 
 //ok
-//需满足头字符是大写，且所有字符不包含'_'
+//是否满足头字符是大写，且所有字符不包含'_'
 bool IsUpperCamelCase(const std::string& name) {
   if (name.empty()) {
     return true;
@@ -206,6 +206,7 @@ inline bool Parser::LookingAtType(io::Tokenizer::TokenType token_type) {
 
 inline bool Parser::AtEnd() { return LookingAtType(io::Tokenizer::TYPE_END); }
 //ok
+//表意
 bool Parser::TryConsume(const char* text) {
   if (LookingAt(text)) {
     input_->Next();
@@ -224,6 +225,7 @@ bool Parser::Consume(const char* text, const char* error) {
   }
 }
 //ok
+//表意
 bool Parser::Consume(const char* text) {
   if (TryConsume(text)) {
     return true;
@@ -233,7 +235,7 @@ bool Parser::Consume(const char* text) {
   }
 }
 //ok
-//查看当前token的类型是否是TYPE_IDENTIFIER，是则保存其名字到output
+//查看当前token的类型是否是TYPE_IDENTIFIER，是则保存其名字到output，否则报错
 bool Parser::ConsumeIdentifier(std::string* output, const char* error) {
   if (LookingAtType(io::Tokenizer::TYPE_IDENTIFIER)) {
     *output = input_->current().text;
@@ -345,7 +347,8 @@ bool Parser::ConsumeString(std::string* output, const char* error) {
     return false;
   }
 }
-//daiding 结束一个表达式，处理注释相关的事情
+//ok
+//结束一个表达式，处理注释相关的事情
 //text：想要吃掉的字符串指针
 //location：当前的location指针
 bool Parser::TryConsumeEndOfDeclaration(const char* text,
@@ -416,7 +419,7 @@ void Parser::AddWarning(const std::string& warning) {
 }
 
 // -------------------------------------------------------------------
-
+//新建一个location
 Parser::LocationRecorder::LocationRecorder(Parser* parser)
     : parser_(parser),
       source_code_info_(parser->source_code_info_),
@@ -536,7 +539,8 @@ void Parser::LocationRecorder::AttachComments(
 }
 
 // -------------------------------------------------------------------
-
+//ok
+//不断跳过字符，直到匹配到';'，期间遇到block，先跳过这个block
 void Parser::SkipStatement() {
   while (true) {
     if (AtEnd()) {
@@ -554,7 +558,8 @@ void Parser::SkipStatement() {
     input_->Next();
   }
 }
-
+//ok
+//不断跳过字符，直到匹配到'}'
 void Parser::SkipRestOfBlock() {
   while (true) {
     if (AtEnd()) {
@@ -639,8 +644,9 @@ bool Parser::ValidateEnum(const EnumDescriptorProto* proto) {
 
   return true;
 }
-//input：里面包含了文件信息，可以获取文件的内容
-//file：外层新建对象
+//input：外层新建对象，总的Tokenizer
+//file：外层新建对象，文件扫描后的信息写在里面
+//jindu5
 bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
   input_ = input;
   had_errors_ = false;
@@ -655,12 +661,14 @@ bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
 
   if (LookingAtType(io::Tokenizer::TYPE_START)) {
     // Advance to first token.
+    //jindu6
     input_->NextWithComments(NULL, &upcoming_detached_comments_,
                              &upcoming_doc_comments_);
   }
 
   {
     LocationRecorder root_location(this);
+    //daiding 不知道用来干啥的
     root_location.RecordLegacyLocation(file,
                                        DescriptorPool::ErrorCollector::OTHER);
 
@@ -673,11 +681,11 @@ bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
       // Store the syntax into the file.
       if (file != NULL) file->set_syntax(syntax_identifier_);
     } else if (!stop_after_syntax_identifier_) {
-    //daiding
       GOOGLE_LOG(WARNING) << "No syntax specified for the proto file: " << file->name()
                    << ". Please use 'syntax = \"proto2\";' "
                    << "or 'syntax = \"proto3\";' to specify a syntax "
                    << "version. (Defaulted to proto2 syntax.)";
+                   //检测不到syntax，默认使用proto2
       syntax_identifier_ = "proto2";
     }
 
@@ -734,8 +742,8 @@ bool Parser::ParseSyntaxIdentifier(const LocationRecorder& parent) {
 
   return true;
 }
-
-//file：外层新对象
+//jindu06020708
+//file：外层新建对象，文件扫描后的信息写在里面
 //root_location：当前的location
 bool Parser::ParseTopLevelStatement(FileDescriptorProto* file,
                                     const LocationRecorder& root_location) {
@@ -782,7 +790,7 @@ bool Parser::ParseTopLevelStatement(FileDescriptorProto* file,
 
 // -------------------------------------------------------------------
 // Messages
-//message：新增的消息，此函数会往里面填内容
+//message：新增的DescriptorProto，此函数会往里面填内容
 //message_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
 bool Parser::ParseMessageDefinition(
@@ -892,7 +900,7 @@ void AdjustReservedRangesWithMaxEndNumber(DescriptorProto* message) {
 }
 
 }  // namespace
-//message：新增的消息，此函数会往里面填内容
+//message：新增的DescriptorProto，此函数会往里面填内容
 //message_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
 bool Parser::ParseMessageBlock(DescriptorProto* message,
@@ -2027,6 +2035,7 @@ bool Parser::ParseOneof(OneofDescriptorProto* oneof_decl,
 //enum_type：新增的enum，此函数会往里面填内容
 //enum_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
+//jindu7
 bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
                                  const LocationRecorder& enum_location,
                                  const FileDescriptorProto* containing_file) {

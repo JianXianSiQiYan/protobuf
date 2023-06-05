@@ -285,8 +285,11 @@ class PROTOBUF_EXPORT Parser {
     // Indexes of parent and current location in the parent
     // SourceCodeInfo.location repeated field. For top-level elements,
     // parent_index_ is -1.
+    //Parser只有一个吧，记录下来
     Parser* parser_;
+    //SourceCodeInfo只有一个吧，记录下来
     SourceCodeInfo* source_code_info_;
+    //Location本体
     SourceCodeInfo::Location* location_;
 
     void Init(const LocationRecorder& parent, SourceCodeInfo* source_code_info);

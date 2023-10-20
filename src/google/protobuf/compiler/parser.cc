@@ -206,7 +206,6 @@ inline bool Parser::LookingAtType(io::Tokenizer::TokenType token_type) {
 
 inline bool Parser::AtEnd() { return LookingAtType(io::Tokenizer::TYPE_END); }
 //ok
-//表意
 bool Parser::TryConsume(const char* text) {
   if (LookingAt(text)) {
     input_->Next();
@@ -225,7 +224,6 @@ bool Parser::Consume(const char* text, const char* error) {
   }
 }
 //ok
-//表意
 bool Parser::Consume(const char* text) {
   if (TryConsume(text)) {
     return true;
@@ -742,7 +740,7 @@ bool Parser::ParseSyntaxIdentifier(const LocationRecorder& parent) {
 
   return true;
 }
-//jindu06020708
+//jindu20230602
 //file：外层新建对象，文件扫描后的信息写在里面
 //root_location：当前的location
 bool Parser::ParseTopLevelStatement(FileDescriptorProto* file,
@@ -922,9 +920,11 @@ bool Parser::ParseMessageBlock(DescriptorProto* message,
   }
 
   if (message->extension_range_size() > 0) {
+  //daiding
     AdjustExtensionRangesWithMaxEndNumber(message);
   }
   if (message->reserved_range_size() > 0) {
+  //daiding
     AdjustReservedRangesWithMaxEndNumber(message);
   }
   return true;

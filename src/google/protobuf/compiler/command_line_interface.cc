@@ -195,7 +195,7 @@ bool TryCreateParentDirectory(const std::string& prefix,
 }
 
 // Get the absolute path of this protoc binary.
-//ok 
+//deal
 //获取pb程序的绝对路径，例如"E:\\protobuf_build\\Debug\\protoc.exe"
 bool GetProtocAbsolutePath(std::string* path) {
 #ifdef _WIN32
@@ -252,12 +252,14 @@ void AddDefaultProtoPaths(
   if (!GetProtocAbsolutePath(&path)) {
     return;
   }
+  //path在此刻的例子："E:\\protobuf_build\\Debug\\protoc.exe"
   // Strip the binary name.
   size_t pos = path.find_last_of("/\\");
   if (pos == std::string::npos || pos == 0) {
     return;
   }
   path = path.substr(0, pos);
+  //path在此刻的例子："E:\\protobuf_build\\Debug
   // Check the binary's directory.
   if (IsInstalledProtoPath(path)) {
     paths->push_back(std::pair<std::string, std::string>("", path));
@@ -982,7 +984,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
 
   //扫描input_files_，填入parsed_files
   std::vector<const FileDescriptor*> parsed_files;
-  std::unique_ptr<DiskSourceTree> disk_source_tree;
+  std::unique_ptr<DiskSourceTree> disk_source_tree;//#1037 new DiskSourceTree
   std::unique_ptr<ErrorPrinter> error_collector;
   std::unique_ptr<DescriptorPool> descriptor_pool;
 
@@ -991,14 +993,14 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
   // managing their lifetimes. Its scope should match descriptor_set_in_database
   std::vector<std::unique_ptr<SimpleDescriptorDatabase>>
       databases_per_descriptor_set;
-  std::unique_ptr<MergedDescriptorDatabase> descriptor_set_in_database;
+  std::unique_ptr<MergedDescriptorDatabase> descriptor_set_in_database;//因为daiding descriptor_set_in_names_暂时看成空，所以descriptor_set_in_database为空
 
   std::unique_ptr<SourceTreeDescriptorDatabase> source_tree_database;
 
   // Any --descriptor_set_in FileDescriptorSet objects will be used as a
   // fallback to input_files on command line, so create that db first.
   if (!descriptor_set_in_names_.empty()) {
-    //daiding
+    //daiding descriptor_set_in_names_暂时看成空
     for (const std::string& name : descriptor_set_in_names_) {
       std::unique_ptr<SimpleDescriptorDatabase> database_for_descriptor_set =
           PopulateSingleSimpleDescriptorDatabase(name);
@@ -1019,9 +1021,9 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
     descriptor_set_in_database.reset(
         new MergedDescriptorDatabase(raw_databases_per_descriptor_set));
   }
-
+  //jindu1
   if (proto_path_.empty()) {
-    //daiding
+    //daiding 暂时认为不为空
     // If there are no --proto_path flags, then just look in the specified
     // --descriptor_set_in files.  But first, verify that the input files are
     // there.
@@ -1053,7 +1055,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
   }
 
   descriptor_pool->EnforceWeakDependencies(true);
-  //jindu1
+  
   if (!ParseInputFiles(descriptor_pool.get(), disk_source_tree.get(),
                        &parsed_files)) {
     return 1;
@@ -1166,8 +1168,8 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
   return 0;
 }
 //daiding
-//fallback_database：暂时看成是nullptr
-//source_tree：外层新对象的指针
+//fallback_database：暂时看成nullptr
+//source_tree：外层new出来的指针
 //例子：input_file由"C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"转换成了"wrappers.proto"
 bool CommandLineInterface::InitializeDiskSourceTree(
     DiskSourceTree* source_tree, DescriptorDatabase* fallback_database) {
@@ -1795,6 +1797,7 @@ CommandLineInterface::InterpretArgument(const std::string& name,
       // Don't use make_pair as the old/default standard library on Solaris
       // doesn't support it without explicit template parameters, which are
       // incompatible with C++0x's make_pair.
+      // 
       //对于-I=C:\Users\Tim\Desktop\input\
       //virtual_path为""
       //disk_path为"C:\\Users\\Tim\\Desktop\\input\\"

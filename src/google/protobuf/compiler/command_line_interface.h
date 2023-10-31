@@ -393,7 +393,7 @@ class PROTOC_EXPORT CommandLineInterface {
     ERROR_FORMAT_MSVS  // Visual Studio output (--error_format=msvs).
   };
 
-  ErrorFormat error_format_ = ERROR_FORMAT_GCC;
+  ErrorFormat error_format_ = ERROR_FORMAT_GCC; //如果不使用--error_format，则值为ERROR_FORMAT_GCC
 
   // True if we should treat warnings as errors that fail the compilation.
   bool fatal_warnings_ = false;

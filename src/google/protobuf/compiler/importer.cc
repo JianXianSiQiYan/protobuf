@@ -435,7 +435,6 @@ DiskSourceTree::DiskFileToVirtualFile(const std::string& disk_file,
   // Iterate through all mappings with higher precedence and verify that none
   // of them map this file to some other existing file.
   for (int i = 0; i < mapping_index; i++) {
-  //daiding
     if (ApplyMapping(*virtual_file, mappings_[i].virtual_path,
                      mappings_[i].disk_path, shadowing_disk_file)) {
       if (access(shadowing_disk_file->c_str(), F_OK) >= 0) {

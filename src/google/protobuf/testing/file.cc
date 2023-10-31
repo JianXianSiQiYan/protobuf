@@ -145,7 +145,7 @@ bool File::RecursivelyCreateDir(const std::string& path, int mode) {
   return RecursivelyCreateDir(path.substr(0, slashpos), mode) &&
          CreateDir(path, mode);
 }
-
+//daiding 大概的意思是删除路径
 void File::DeleteRecursively(const std::string& name, void* dummy1,
                              void* dummy2) {
   if (name.empty()) return;

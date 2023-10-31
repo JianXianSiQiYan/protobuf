@@ -106,7 +106,7 @@ std::string TestSourceDir() {
 }
 
 namespace {
-
+//ok 可靠地获取一个临时路径名
 std::string GetTemporaryDirectoryName() {
   // Tests run under Bazel "should not" use /tmp. Bazel sets this environment
   // variable for tests to use instead.
@@ -118,7 +118,7 @@ std::string GetTemporaryDirectoryName() {
   // tmpnam() is generally not considered safe but we're only using it for
   // testing.  We cannot use tmpfile() or mkstemp() since we're creating a
   // directory.
-  char b[L_tmpnam + 1];     // HPUX multithread return 0 if s is 0
+  char b[L_tmpnam + 1];     // HPUX multithread return 0 if s is 0//这里为什么要+1？
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   std::string result = tmpnam(b);
@@ -165,7 +165,7 @@ class TempDirDeleter {
       File::DeleteRecursively(name_, NULL, NULL);
     }
   }
-
+  //ok 可靠地获取一个临时路径
   std::string GetTempDir() {
     if (name_.empty()) {
       name_ = GetTemporaryDirectoryName();
@@ -185,7 +185,7 @@ class TempDirDeleter {
 TempDirDeleter temp_dir_deleter_;
 
 }  // namespace
-
+//ok 可靠地获取一个临时路径
 std::string TestTempDir() { return temp_dir_deleter_.GetTempDir(); }
 
 // TODO(kenton):  Share duplicated code below.  Too busy/lazy for now.

@@ -2007,7 +2007,7 @@ class PROTOBUF_EXPORT DescriptorPool {
   internal::WrappedMutex* mutex_;
 
   // See constructor.
-  DescriptorDatabase* fallback_database_;
+  DescriptorDatabase* fallback_database_;//即source_tree_database
   ErrorCollector* default_error_collector_;
   const DescriptorPool* underlay_;
 
@@ -2024,7 +2024,7 @@ class PROTOBUF_EXPORT DescriptorPool {
 
   // Set of files to track for unused imports. The bool value when true means
   // unused imports are treated as errors (and as warnings when false).
-  //保存没有用到的import file的告警等级，true是error，false是warn
+  //保存没有用import file时的告警等级，true是error，false是warn，默认false
   std::map<std::string, bool> unused_import_track_files_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(DescriptorPool);

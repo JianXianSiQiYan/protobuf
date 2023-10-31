@@ -91,7 +91,7 @@ class PROTOBUF_EXPORT SourceTreeDescriptorDatabase : public DescriptorDatabase {
   // to the given MultiFileErrorCollector.  This should be called before
   // parsing.  error_collector must remain valid until either this method
   // is called again or the SourceTreeDescriptorDatabase is destroyed.
-  //使用到的是ErrorPrinter
+  //使用到的是ErrorPrinter，在protobuf\src\google\protobuf\compiler\command_line_interface.cc 1050行赋值了
   void RecordErrorsTo(MultiFileErrorCollector* error_collector) {
     error_collector_ = error_collector;
   }
@@ -144,7 +144,7 @@ class PROTOBUF_EXPORT SourceTreeDescriptorDatabase : public DescriptorDatabase {
 
   bool using_validation_error_collector_;
   SourceLocationTable source_locations_;
-  ValidationErrorCollector validation_error_collector_;
+  ValidationErrorCollector validation_error_collector_;//在SourceTreeDescriptorDatabase的构造函数中与其一起初始化--指定ValidationErrorCollector的owner_
 };
 
 // Simple interface for parsing .proto files.  This wraps the process

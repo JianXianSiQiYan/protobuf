@@ -195,7 +195,7 @@ bool TryCreateParentDirectory(const std::string& prefix,
 }
 
 // Get the absolute path of this protoc binary.
-//deal
+//ok
 //获取pb程序的绝对路径，例如"E:\\protobuf_build\\Debug\\protoc.exe"
 bool GetProtocAbsolutePath(std::string* path) {
 #ifdef _WIN32
@@ -232,7 +232,7 @@ bool GetProtocAbsolutePath(std::string* path) {
 
 // Whether a path is where google/protobuf/descriptor.proto and other well-known
 // type protos are installed.
-//ok
+//ok    解释如上
 bool IsInstalledProtoPath(const std::string& path) {
   // Checking the descriptor.proto file should be good enough.
   std::string file_path = path + "/google/protobuf/descriptor.proto";
@@ -242,7 +242,7 @@ bool IsInstalledProtoPath(const std::string& path) {
 // Add the paths where google/protobuf/descriptor.proto and other well-known
 // type protos are installed.
 //ok
-//描述如上
+//把google/protobuf/descriptor.proto所在的目录加到paths
 void AddDefaultProtoPaths(
     std::vector<std::pair<std::string, std::string>>* paths) {
   // TODO(xiaofeng): The code currently only checks relative paths of where
@@ -984,9 +984,9 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
 
   //扫描input_files_，填入parsed_files
   std::vector<const FileDescriptor*> parsed_files;
-  std::unique_ptr<DiskSourceTree> disk_source_tree;//#1037 new DiskSourceTree
-  std::unique_ptr<ErrorPrinter> error_collector;
-  std::unique_ptr<DescriptorPool> descriptor_pool;
+  std::unique_ptr<DiskSourceTree> disk_source_tree;//1039行new
+  std::unique_ptr<ErrorPrinter> error_collector;//1045行new
+  std::unique_ptr<DescriptorPool> descriptor_pool;//1052行new
 
   // The SimpleDescriptorDatabases here are the constituents of the
   // MergedDescriptorDatabase descriptor_set_in_database, so this vector is for
@@ -995,7 +995,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
       databases_per_descriptor_set;
   std::unique_ptr<MergedDescriptorDatabase> descriptor_set_in_database;//因为daiding descriptor_set_in_names_暂时看成空，所以descriptor_set_in_database为空
 
-  std::unique_ptr<SourceTreeDescriptorDatabase> source_tree_database;
+  std::unique_ptr<SourceTreeDescriptorDatabase> source_tree_database;//1048行new
 
   // Any --descriptor_set_in FileDescriptorSet objects will be used as a
   // fallback to input_files on command line, so create that db first.
@@ -1038,7 +1038,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
      
     disk_source_tree.reset(new DiskSourceTree());
     if (!InitializeDiskSourceTree(disk_source_tree.get(),
-                                  descriptor_set_in_database.get())) {
+                                  descriptor_set_in_database.get())) {//descriptor_set_in_database暂时看成空
       return 1;
     }
     
@@ -1046,14 +1046,14 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
         new ErrorPrinter(error_format_, disk_source_tree.get()));
 
     source_tree_database.reset(new SourceTreeDescriptorDatabase(
-        disk_source_tree.get(), descriptor_set_in_database.get()));
+        disk_source_tree.get(), descriptor_set_in_database.get()));//descriptor_set_in_database暂时看成空
     source_tree_database->RecordErrorsTo(error_collector.get());
 
     descriptor_pool.reset(new DescriptorPool(
         source_tree_database.get(),
-        source_tree_database->GetValidationErrorCollector()));
+        source_tree_database->GetValidationErrorCollector()));//即SourceTreeDescriptorDatabase的validation_error_collector_
   }
-
+  //jindu20231030
   descriptor_pool->EnforceWeakDependencies(true);
   
   if (!ParseInputFiles(descriptor_pool.get(), disk_source_tree.get(),
@@ -1167,7 +1167,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
 
   return 0;
 }
-//daiding
+//ok 将input_files_中的文件改造成相对路径
 //fallback_database：暂时看成nullptr
 //source_tree：外层new出来的指针
 //例子：input_file由"C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"转换成了"wrappers.proto"
@@ -1265,7 +1265,6 @@ bool CommandLineInterface::ParseInputFiles(
     std::vector<const FileDescriptor*>* parsed_files) {
 
   if (!proto_path_.empty()) {
-  //daiding
     // Track unused imports in all source files that were loaded from the
     // filesystem. We do not track unused imports for files loaded from
     // descriptor sets as they may be programmatically generated in which case
@@ -1280,7 +1279,7 @@ bool CommandLineInterface::ParseInputFiles(
     // depending on the invocation. At least for invocations that are
     // exclusively reading from descriptor sets, we can eliminate this failure
     // condition.
-    //保存没有用到的import file的告警等级，true是error，false是warn
+    //保存没有用import file时的告警等级，true是error，false是warn，默认false
     for (const auto& input_file : input_files_) {
       descriptor_pool->AddUnusedImportTrackFile(input_file);
     }
@@ -1290,7 +1289,6 @@ bool CommandLineInterface::ParseInputFiles(
   // Parse each file.
   for (const auto& input_file : input_files_) {
     // Import the file.
-    //jindu2
     const FileDescriptor* parsed_file =
         descriptor_pool->FindFileByName(input_file);
     if (parsed_file == NULL) {
@@ -1361,27 +1359,26 @@ void CommandLineInterface::Clear() {
   deterministic_output_ = false;
 }
 
-//daiding
+//ok
 //source_tree：外层新对象的指针
 //proto：将要编译的文件的路径
-//fallback_database：暂时看成是nullptr
+//fallback_database暂时看成是nullptr
 //例子：proto由"C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"转换成了"wrappers.proto"
 bool CommandLineInterface::MakeProtoProtoPathRelative(
     DiskSourceTree* source_tree, std::string* proto,
     DescriptorDatabase* fallback_database) {
   // If it's in the fallback db, don't report non-existent file errors.
   FileDescriptorProto fallback_file;
-  bool in_fallback_database =
+  bool in_fallback_database =//暂时看成false，因为fallback_database暂时看成是nullptr
       fallback_database != nullptr &&
       fallback_database->FindFileByName(*proto, &fallback_file);
 
   // If the input file path is not a physical file path, it must be a virtual
   // path.
-  if (access(proto->c_str(), F_OK) < 0) {
-  //daiding
+  if (access(proto->c_str(), F_OK) < 0) {//文件proto是否存在
     std::string disk_file;
     if (source_tree->VirtualFileToDiskFile(*proto, &disk_file) ||
-        in_fallback_database) {
+        in_fallback_database) {//in_fallback_database暂时看成false
       return true;
     } else {
       std::cerr << "Could not make proto path relative: " << *proto << ": "
@@ -1397,7 +1394,6 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
       *proto = virtual_file;
       break;
     case DiskSourceTree::SHADOWED:
-    //daiding
       std::cerr << *proto << ": Input is shadowed in the --proto_path by \""
                 << shadowing_disk_file
                 << "\".  Either use the latter file as your input or reorder "
@@ -1406,7 +1402,6 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
                 << std::endl;
       return false;
     case DiskSourceTree::CANNOT_OPEN: {
-    //daiding
       if (in_fallback_database) {
         return true;
       }
@@ -1418,7 +1413,6 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
       return false;
     }
     case DiskSourceTree::NO_MAPPING: {
-    //daiding
       // Try to interpret the path as a virtual path.
       std::string disk_file;
       if (source_tree->VirtualFileToDiskFile(*proto, &disk_file) ||
@@ -1443,7 +1437,7 @@ bool CommandLineInterface::MakeProtoProtoPathRelative(
   }
   return true;
 }
-//daiding
+//ok 将input_files_中的文件改造成相对路径
 //fallback_database：暂时看成是nullptr
 //source_tree：外层新对象的指针
 //例子：input_file由"C:\\Users\\Tim\\Desktop\\input\\wrappers.proto"转换成了"wrappers.proto"

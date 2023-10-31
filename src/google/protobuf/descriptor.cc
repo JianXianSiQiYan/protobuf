@@ -1873,7 +1873,7 @@ void DescriptorPool::InternalDontEnforceDependencies() {
   enforce_dependencies_ = false;
 }
 //ok
-//保存没有用到的import file的告警等级，true是error，false是warn
+//保存没有用import file时的告警等级，true是error，false是warn，默认false
 void DescriptorPool::AddUnusedImportTrackFile(ConstStringParam file_name,
                                               bool is_error) {
   unused_import_track_files_[std::string(file_name)] = is_error;
@@ -1962,13 +1962,12 @@ void DescriptorPool::InternalAddGeneratedFile(
 //name：将要编译的文件名
 const FileDescriptor* DescriptorPool::FindFileByName(
     ConstStringParam name) const {
-    //mutex_ daiding
   MutexLockMaybe lock(mutex_);
   if (fallback_database_ != nullptr) {
     tables_->known_bad_symbols_.clear();
     tables_->known_bad_files_.clear();
   }
-  const FileDescriptor* result = tables_->FindFile(name);
+  const FileDescriptor* result = tables_->FindFile(name);//jindu20231031 tables_从哪里来的？
   if (result != nullptr) return result;
   if (underlay_ != nullptr) {
     result = underlay_->FindFileByName(name);

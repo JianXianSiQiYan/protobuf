@@ -412,7 +412,7 @@ TEST_F(DiskSourceTreeTest, OrderingTrumpsSpecificity) {
   // Check.
   ExpectFileContents("bar/foo", "Hello World!");
 }
-
+//ok
 TEST_F(DiskSourceTreeTest, DiskFileToVirtualFile) {
   // Test DiskFileToVirtualFile.
 

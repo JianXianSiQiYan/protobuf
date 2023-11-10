@@ -139,8 +139,7 @@ inline int ToIntSize(size_t size) {
 // 3. Call get() and get_mutable() only if the object is initialized.
 // 4. Call Destruct() only if the object is initialized.
 //    After the call, the object becomes uninitialized.
-//ok
-template <typename T>
+template <typename T>//ok 容纳T，使之构造和去构造都要手动执行
 class ExplicitlyConstructed {
  public:
   void DefaultConstruct() { new (&union_) T(); }

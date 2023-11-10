@@ -61,7 +61,7 @@ namespace internal {
 void DestroyMessage(const void* message) {
   static_cast<const MessageLite*>(message)->~MessageLite();
 }
-void DestroyString(const void* s) {
+void DestroyString(const void* s) {//ok
   static_cast<const std::string*>(s)->~basic_string();
 }
 
@@ -80,7 +80,7 @@ static bool InitProtobufDefaultsImpl() {
   init_protobuf_defaults_state.store(true, std::memory_order_release);
   return true;
 }
-
+//ok
 void InitProtobufDefaultsSlow() {
   static bool is_inited = InitProtobufDefaultsImpl();
   (void)is_inited;

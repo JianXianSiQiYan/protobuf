@@ -200,7 +200,7 @@ PROTOBUF_EXPORT void DestroyString(const void* s);
 inline void OnShutdownDestroyMessage(const void* ptr) {
   OnShutdownRun(DestroyMessage, ptr);
 }
-// Destroy the string (call std::string destructor)
+// Destroy the string (call std::string destructor)//ok
 inline void OnShutdownDestroyString(const std::string* ptr) {
   OnShutdownRun(DestroyString, ptr);
 }

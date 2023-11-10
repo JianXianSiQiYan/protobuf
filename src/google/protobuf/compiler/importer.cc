@@ -90,8 +90,8 @@ MultiFileErrorCollector::~MultiFileErrorCollector() {}
 class SourceTreeDescriptorDatabase::SingleFileErrorCollector
     : public io::ErrorCollector {
  public:
-  SingleFileErrorCollector(const std::string& filename,
-                           MultiFileErrorCollector* multi_file_error_collector)
+  SingleFileErrorCollector(const std::string& filename,//filename：将要编译文件，相对路径
+                           MultiFileErrorCollector* multi_file_error_collector)//即error_collector_，类型ErrorPrinter
       : filename_(filename),
         multi_file_error_collector_(multi_file_error_collector),
         had_errors_(false) {}
@@ -134,13 +134,12 @@ SourceTreeDescriptorDatabase::SourceTreeDescriptorDatabase(
 SourceTreeDescriptorDatabase::~SourceTreeDescriptorDatabase() {}
 
 //output：外层新建对象指针
-//filename：将要编译文件
+//filename：将要编译文件，相对路径
 //jindu4
 bool SourceTreeDescriptorDatabase::FindFileByName(const std::string& filename,
                                                   FileDescriptorProto* output) {
   std::unique_ptr<io::ZeroCopyInputStream> input(source_tree_->Open(filename));
-  if (input == NULL) {
-  //daiding
+  if (input == NULL) {//暂时看成不为NULL
     if (fallback_database_ != nullptr &&
         fallback_database_->FindFileByName(filename, output)) {
       return true;
@@ -473,9 +472,9 @@ std::string DiskSourceTree::GetLastErrorMessage() {
   return last_error_message_;
 }
 //ok
+//将virtual_file改造成DiskFile，保存在disk_file，打开改造文件名后的文件
 //virtual_file：将要编译的文件名
 //disk_file：将virtual_file文件头改造后的文件名
-//将virtual_file改造文件头，保存在disk_file，打开改造文件名后的文件
 io::ZeroCopyInputStream* DiskSourceTree::OpenVirtualFile(
     const std::string& virtual_file, std::string* disk_file) {
   if (virtual_file != CanonicalizePath(virtual_file) ||

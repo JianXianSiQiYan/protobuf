@@ -1967,9 +1967,9 @@ const FileDescriptor* DescriptorPool::FindFileByName(
     tables_->known_bad_symbols_.clear();
     tables_->known_bad_files_.clear();
   }
-  const FileDescriptor* result = tables_->FindFile(name);//jindu20231031 tables_从哪里来的？
+  const FileDescriptor* result = tables_->FindFile(name);//daiding 先看成找不到，tables_都不知道是什么来的
   if (result != nullptr) return result;
-  if (underlay_ != nullptr) {
+  if (underlay_ != nullptr) {//underlay_必定是nullptr
     result = underlay_->FindFileByName(name);
     if (result != nullptr) return result;
   }
@@ -2382,9 +2382,7 @@ bool DescriptorPool::TryFindFileInFallbackDatabase(
   auto name_string = std::string(name);
   if (tables_->known_bad_files_.count(name_string) > 0) return false;
 
-  FileDescriptorProto file_proto;
-  //jindu4
-  //这里的类型是SourceTreeDescriptorDatabase
+  FileDescriptorProto file_proto;//jindu4
   if (!fallback_database_->FindFileByName(name_string, &file_proto) ||
       BuildFileFromDatabase(file_proto) == nullptr) {
     tables_->known_bad_files_.insert(std::move(name_string));

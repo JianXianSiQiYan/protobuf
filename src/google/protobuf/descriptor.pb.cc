@@ -8377,7 +8377,7 @@ void EnumOptions::InternalSwap(EnumOptions* other) {
           reinterpret_cast<char*>(&allow_alias_),
           reinterpret_cast<char*>(&other->allow_alias_));
 }
-
+//jindu16
 ::PROTOBUF_NAMESPACE_ID::Metadata EnumOptions::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_google_2fprotobuf_2fdescriptor_2eproto_getter, &descriptor_table_google_2fprotobuf_2fdescriptor_2eproto_once,
@@ -9140,7 +9140,7 @@ void MethodOptions::CopyFrom(const MethodOptions& from) {
   MergeFrom(from);
 }
 
-bool MethodOptions::IsInitialized() const {
+bool MethodOptions::IsInitialized() const {//jindu20
   if (!_extensions_.IsInitialized()) {
     return false;
   }

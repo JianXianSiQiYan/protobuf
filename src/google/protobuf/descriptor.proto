@@ -728,7 +728,7 @@ message MethodOptions {
 // in them.
 message UninterpretedOption {
   // The name of the uninterpreted option.  Each string represents a segment in
-  // a dot-separated name.  is_extension is true iff a segment represents an
+  // a dot-separated name.  is_extension is true if a segment represents an
   // extension (denoted with parentheses in options specs in .proto files).
   // E.g.,{ ["foo", false], ["bar.baz", true], ["qux", false] } represents
   // "foo.(bar.baz).qux".
@@ -807,9 +807,9 @@ message SourceCodeInfo {
     // example, this path:
     //   [ 4, 3, 2, 7, 1 ]
     // refers to:
-    //   file.message_type(3)  // 4, 3
-    //       .field(7)         // 2, 7
-    //       .name()           // 1
+    //   file.message_type(3)  // 4, 3//第4个message_type
+    //       .field(7)         // 2, 7//第7个field
+    //       .name()           // 1		///第7个field的name
     // This is because FileDescriptorProto.message_type has field number 4:
     //   repeated DescriptorProto message_type = 4;
     // and DescriptorProto.field has field number 2:

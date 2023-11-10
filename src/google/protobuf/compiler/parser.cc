@@ -497,7 +497,7 @@ void Parser::LocationRecorder::EndAt(const io::Tokenizer::Token& token) {
 //ok
 //向parser_->source_location_table_加入一个元素
 void Parser::LocationRecorder::RecordLegacyLocation(
-    const Message* descriptor,
+    const Message* descriptor,//descriptor：外层新建对象，文件扫描后的信息写在里面
     DescriptorPool::ErrorCollector::ErrorLocation location) {
   if (parser_->source_location_table_ != NULL) {
     parser_->source_location_table_->Add(
@@ -659,9 +659,8 @@ bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
 
   if (LookingAtType(io::Tokenizer::TYPE_START)) {
     // Advance to first token.
-    //jindu6
     input_->NextWithComments(NULL, &upcoming_detached_comments_,
-                             &upcoming_doc_comments_);
+                             &upcoming_doc_comments_);//这里过后获取到了一个非注释的token
   }
 
   {
@@ -671,7 +670,7 @@ bool Parser::Parse(io::Tokenizer* input, FileDescriptorProto* file) {
                                        DescriptorPool::ErrorCollector::OTHER);
 
     if (require_syntax_identifier_ || LookingAt("syntax")) {
-      if (!ParseSyntaxIdentifier(root_location)) {
+      if (!ParseSyntaxIdentifier(root_location)) {//扫描syntax token，保存于syntax_identifier_
         // Don't attempt to parse the file if we didn't recognize the syntax
         // identifier.
         return false;
@@ -740,15 +739,15 @@ bool Parser::ParseSyntaxIdentifier(const LocationRecorder& parent) {
 
   return true;
 }
-//jindu20230602
+//jindu6
 //file：外层新建对象，文件扫描后的信息写在里面
-//root_location：当前的location
+//root_location：外面的root_location
 bool Parser::ParseTopLevelStatement(FileDescriptorProto* file,
                                     const LocationRecorder& root_location) {
   if (TryConsumeEndOfDeclaration(";", NULL)) {
     // empty statement; ignore
     return true;
-  } else if (LookingAt("message")) {
+  } else if (LookingAt("message")) {//jindu6
     LocationRecorder location(root_location,
                               FileDescriptorProto::kMessageTypeFieldNumber,
                               file->message_type_size());
@@ -791,7 +790,7 @@ bool Parser::ParseTopLevelStatement(FileDescriptorProto* file,
 //message：新增的DescriptorProto，此函数会往里面填内容
 //message_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-bool Parser::ParseMessageDefinition(
+bool Parser::ParseMessageDefinition(//jindu8
     DescriptorProto* message, const LocationRecorder& message_location,
     const FileDescriptorProto* containing_file) {
   DO(Consume("message"));
@@ -932,7 +931,7 @@ bool Parser::ParseMessageBlock(DescriptorProto* message,
 //message：新增的消息，此函数会往里面填内容
 //message_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-//jindu6
+//jindu7
 bool Parser::ParseMessageStatement(DescriptorProto* message,
                                    const LocationRecorder& message_location,
                                    const FileDescriptorProto* containing_file) {
@@ -1505,12 +1504,11 @@ bool Parser::ParseUninterpretedBlock(std::string* value) {
 //options：新增的options消息，此函数会往里面填内容
 //options_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-bool Parser::ParseOption(Message* options,
+bool Parser::ParseOption(Message* options,//jindu15
                          const LocationRecorder& options_location,
                          const FileDescriptorProto* containing_file,
                          OptionStyle style) {
   // Create an entry in the uninterpreted_option field.
-  //获取可能存在的uninterpreted_option_field字段
   const FieldDescriptor* uninterpreted_option_field =
       options->GetDescriptor()->FindFieldByName("uninterpreted_option");
   GOOGLE_CHECK(uninterpreted_option_field != NULL)
@@ -2031,11 +2029,10 @@ bool Parser::ParseOneof(OneofDescriptorProto* oneof_decl,
 }
 
 // -------------------------------------------------------------------
-// Enums
+// Enums//jindu9
 //enum_type：新增的enum，此函数会往里面填内容
 //enum_location：当前的location
 //containing_file：当前文件扫描后的信息就记录在里面
-//jindu7
 bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
                                  const LocationRecorder& enum_location,
                                  const FileDescriptorProto* containing_file) {
@@ -2049,7 +2046,7 @@ bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
                                   DescriptorPool::ErrorCollector::NAME);
     DO(ConsumeIdentifier(enum_type->mutable_name(), "Expected enum name."));
   }
-
+  //jindu10
   DO(ParseEnumBlock(enum_type, enum_location, containing_file));
 
   DO(ValidateEnum(enum_type));
@@ -2058,7 +2055,7 @@ bool Parser::ParseEnumDefinition(EnumDescriptorProto* enum_type,
 }
 //enum_type：新增的enum，此函数会往里面填内容
 //enum_location：当前的location
-//containing_file：当前文件扫描后的信息就记录在里面
+//containing_file：当前文件扫描后的信息就记录在里面//jindu11
 bool Parser::ParseEnumBlock(EnumDescriptorProto* enum_type,
                             const LocationRecorder& enum_location,
                             const FileDescriptorProto* containing_file) {
@@ -2069,7 +2066,7 @@ bool Parser::ParseEnumBlock(EnumDescriptorProto* enum_type,
       AddError("Reached end of input in enum definition (missing '}').");
       return false;
     }
-
+    //jindu12
     if (!ParseEnumStatement(enum_type, enum_location, containing_file)) {
       // This statement failed to parse.  Skip it, but keep looping to parse
       // other statements.
@@ -2082,14 +2079,14 @@ bool Parser::ParseEnumBlock(EnumDescriptorProto* enum_type,
 
 //enum_type：新增的enum，此函数会往里面填内容
 //enum_location：当前的location
-//containing_file：当前文件扫描后的信息就记录在里面
+//containing_file：当前文件扫描后的信息就记录在里面//jindu13
 bool Parser::ParseEnumStatement(EnumDescriptorProto* enum_type,
                                 const LocationRecorder& enum_location,
                                 const FileDescriptorProto* containing_file) {
   if (TryConsumeEndOfDeclaration(";", NULL)) {
     // empty statement; ignore
     return true;
-  } else if (LookingAt("option")) {
+  } else if (LookingAt("option")) {//jindu14
     LocationRecorder location(enum_location,
                               EnumDescriptorProto::kOptionsFieldNumber);
     return ParseOption(enum_type->mutable_options(), location, containing_file,

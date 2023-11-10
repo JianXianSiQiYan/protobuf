@@ -474,7 +474,7 @@ bool MessageLite::SerializePartialToString(std::string* output) const {
   output->clear();
   return AppendPartialToString(output);
 }
-
+//jindu19
 bool MessageLite::SerializeToArray(void* data, int size) const {
   GOOGLE_DCHECK(IsInitialized()) << InitializationErrorMessage("serialize", *this);
   return SerializePartialToArray(data, size);

@@ -305,7 +305,7 @@ class CommandLineInterface::ErrorPrinter
         found_errors_(false),
         found_warnings_(false) {}
   ~ErrorPrinter() {}
-
+  //ok 使用std::cerr打印错误信息
   // implements MultiFileErrorCollector ------------------------------
   void AddError(const std::string& filename, int line, int column,
                 const std::string& message) override {
@@ -345,14 +345,14 @@ class CommandLineInterface::ErrorPrinter
 
   bool FoundWarnings() const { return found_warnings_; }
 
- private:
+ private://ok 使用out打印错误信息
   void AddErrorOrWarning(const std::string& filename, int line, int column,
                          const std::string& message, const std::string& type,
                          std::ostream& out) {
     // Print full path when running under MSVS
     std::string dfile;
     if (format_ == CommandLineInterface::ERROR_FORMAT_MSVS && tree_ != NULL &&
-        tree_->VirtualFileToDiskFile(filename, &dfile)) {
+        tree_->VirtualFileToDiskFile(filename, &dfile)) {//daiding format_为ERROR_FORMAT_GCC
       out << dfile;
     } else {
       out << filename;
@@ -1053,7 +1053,7 @@ int CommandLineInterface::Run(int argc, const char* const argv[]) {
         source_tree_database.get(),
         source_tree_database->GetValidationErrorCollector()));//即SourceTreeDescriptorDatabase的validation_error_collector_
   }
-  //jindu20231030
+
   descriptor_pool->EnforceWeakDependencies(true);
   
   if (!ParseInputFiles(descriptor_pool.get(), disk_source_tree.get(),

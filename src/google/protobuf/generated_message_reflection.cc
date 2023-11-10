@@ -2886,8 +2886,7 @@ struct MetadataOwner {
 
 void AddDescriptors(const DescriptorTable* table);
 
-//table：descriptor_table_google_2fprotobuf_2fdescriptor_2eproto
-void AssignDescriptorsImpl(const DescriptorTable* table, bool eager) {
+void AssignDescriptorsImpl(const DescriptorTable* table, bool eager) {//table：descriptor_table_google_2fprotobuf_2fdescriptor_2eproto
   // Ensure the file descriptor is added to the pool.
   {
     // This only happens once per proto file. So a global mutex to serialize
@@ -2943,10 +2942,9 @@ void AssignDescriptorsImpl(const DescriptorTable* table, bool eager) {
   MetadataOwner::Instance()->AddArray(table->file_level_metadata,
                                       helper.GetCurrentMetadataPtr());
 }
-//table：descriptor_table_google_2fprotobuf_2fdescriptor_2eproto
-void AddDescriptorsImpl(const DescriptorTable* table) {
+//jindu17
+void AddDescriptorsImpl(const DescriptorTable* table) {//table：descriptor_table_google_2fprotobuf_2fdescriptor_2eproto
   // Reflection refers to the default fields so make sure they are initialized.
-  //这句话不知道用来干啥的。
   internal::InitProtobufDefaults();
 
   // Ensure all dependent descriptors are registered to the generated descriptor
@@ -2967,7 +2965,7 @@ void AddDescriptors(const DescriptorTable* table) {
   // properly serialized. This function is only called pre-main by global
   // descriptors and we can assume single threaded access or it's called
   // by AssignDescriptorImpl which uses a mutex to sequence calls.
-  if (table->is_initialized) return;
+  if (table->is_initialized) return;//只调一次
   table->is_initialized = true;
   AddDescriptorsImpl(table);
 }

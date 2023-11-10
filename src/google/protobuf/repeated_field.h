@@ -584,7 +584,7 @@ struct IsMovable
 //     // Only needs to be implemented if SpaceUsedExcludingSelf() is called.
 //     static int SpaceUsedLong(const Type&);
 //   };
-class PROTOBUF_EXPORT RepeatedPtrFieldBase {
+class PROTOBUF_EXPORT RepeatedPtrFieldBase {//jindu21
  protected:
   constexpr RepeatedPtrFieldBase();
   explicit RepeatedPtrFieldBase(Arena* arena);

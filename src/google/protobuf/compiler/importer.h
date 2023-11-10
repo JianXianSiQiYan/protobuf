@@ -116,10 +116,9 @@ class PROTOBUF_EXPORT SourceTreeDescriptorDatabase : public DescriptorDatabase {
 
  private:
   class SingleFileErrorCollector;
-  //当前使用的类型是DiskSourceTree
-  SourceTree* source_tree_;
+  SourceTree* source_tree_;//即disk_source_tree，类型为DiskSourceTree
   DescriptorDatabase* fallback_database_;
-  MultiFileErrorCollector* error_collector_;
+  MultiFileErrorCollector* error_collector_;//即error_collector，类型ErrorPrinter，command_line_interface.cc:1045
 
   class PROTOBUF_EXPORT ValidationErrorCollector
       : public DescriptorPool::ErrorCollector {
@@ -142,7 +141,7 @@ class PROTOBUF_EXPORT SourceTreeDescriptorDatabase : public DescriptorDatabase {
   };
   friend class ValidationErrorCollector;
 
-  bool using_validation_error_collector_;
+  bool using_validation_error_collector_;//在E:\protobuf\src\google\protobuf\compiler\command_line_interface.cc:1054设置成了true
   SourceLocationTable source_locations_;
   ValidationErrorCollector validation_error_collector_;//在SourceTreeDescriptorDatabase的构造函数中与其一起初始化--指定ValidationErrorCollector的owner_
 };

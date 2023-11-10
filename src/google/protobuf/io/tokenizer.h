@@ -96,7 +96,7 @@ class PROTOBUF_EXPORT Tokenizer {
   // Construct a Tokenizer that reads and tokenizes text from the given
   // input stream and writes errors to the given error_collector.
   // The caller keeps ownership of input and error_collector.
-  Tokenizer(ZeroCopyInputStream* input, ErrorCollector* error_collector);
+  Tokenizer(ZeroCopyInputStream* input, ErrorCollector* error_collector);//input：将要编译文件打开后的stream，error_collector：从E:\protobuf\src\google\protobuf\compiler\importer.cc:155构造
   ~Tokenizer();
 
   enum TokenType {

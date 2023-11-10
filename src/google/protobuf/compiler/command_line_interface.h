@@ -401,7 +401,7 @@ class PROTOC_EXPORT CommandLineInterface {
   std::vector<std::pair<std::string, std::string> >
       proto_path_;                        // Search path for proto files.
     //将要编译的文件
-  std::vector<std::string> input_files_;  // Names of the input proto files.
+  std::vector<std::string> input_files_;  // Names of the input proto files.//在InitializeDiskSourceTree改造成了相对路径
 
   // Names of proto files which are allowed to be imported. Used by build
   // systems to enforce depend-on-what-you-import.

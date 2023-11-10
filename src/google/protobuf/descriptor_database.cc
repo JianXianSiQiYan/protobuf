@@ -149,7 +149,7 @@ bool SimpleDescriptorDatabase::DescriptorIndex<Value>::AddFile(
 namespace {
 
 // Returns true if and only if all characters in the name are alphanumerics,
-// underscores, or periods.
+// underscores, or periods.//ok
 bool ValidateSymbolName(StringPiece name) {
   for (char c : name) {
     // I don't trust ctype.h due to locales.  :(
@@ -553,7 +553,7 @@ class EncodedDescriptorDatabase::DescriptorIndex {
 bool EncodedDescriptorDatabase::Add(const void* encoded_file_descriptor,
                                     int size) {
   FileDescriptorProto file;
-  if (file.ParseFromArray(encoded_file_descriptor, size)) {
+  if (file.ParseFromArray(encoded_file_descriptor, size)) {//jindu18
     return index_->AddFile(file, std::make_pair(encoded_file_descriptor, size));
   } else {
     GOOGLE_LOG(ERROR) << "Invalid file descriptor data passed to "

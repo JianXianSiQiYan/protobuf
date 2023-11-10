@@ -86,13 +86,13 @@ class PROTOBUF_EXPORT Parser {
   // SourceLocationTable while parsing.  This can be used to look up exact line
   // and column numbers for errors reported by DescriptorPool during validation.
   // Set to NULL (the default) to discard source location information.
-  void RecordSourceLocationsTo(SourceLocationTable* location_table) {
+  void RecordSourceLocationsTo(SourceLocationTable* location_table) {//即SourceTreeDescriptorDatabase的source_locations_
     source_location_table_ = location_table;
   }
 
   // Requests that errors be recorded to the given ErrorCollector while
   // parsing.  Set to NULL (the default) to discard error messages.
-  void RecordErrorsTo(io::ErrorCollector* error_collector) {
+  void RecordErrorsTo(io::ErrorCollector* error_collector) {//从E:\protobuf\src\google\protobuf\compiler\importer.cc:155构造
     error_collector_ = error_collector;
   }
 
@@ -104,7 +104,7 @@ class PROTOBUF_EXPORT Parser {
   // identifier.  Otherwise, files may omit this.  If a syntax identifier
   // is provided, it must be 'syntax = "proto2";' and must appear at the
   // top of this file regardless of whether or not it was required.
-  void SetRequireSyntaxIdentifier(bool value) {
+  void SetRequireSyntaxIdentifier(bool value) {//ft才用到
     require_syntax_identifier_ = value;
   }
 
@@ -288,7 +288,7 @@ class PROTOBUF_EXPORT Parser {
     //Parser只有一个吧，记录下来
     Parser* parser_;
     //SourceCodeInfo只有一个吧，记录下来
-    SourceCodeInfo* source_code_info_;
+    SourceCodeInfo* source_code_info_;//parser的source_code_info_
     //Location本体
     SourceCodeInfo::Location* location_;
 
@@ -531,10 +531,10 @@ class PROTOBUF_EXPORT Parser {
 
   // =================================================================
 
-  io::Tokenizer* input_;
-  io::ErrorCollector* error_collector_;
-  SourceCodeInfo* source_code_info_;
-  SourceLocationTable* source_location_table_;  // legacy
+  io::Tokenizer* input_;//构造函数传进来的Tokenizer
+  io::ErrorCollector* error_collector_;//类型为 SingleFileErrorCollector，从E:\protobuf\src\google\protobuf\compiler\importer.cc:155构造
+  SourceCodeInfo* source_code_info_;//E:\protobuf\src\google\protobuf\compiler\parser.cc:657
+  SourceLocationTable* source_location_table_;  // legacy //即SourceTreeDescriptorDatabase的source_locations_
   bool had_errors_;
   //只有FT会用到，默认false
   bool require_syntax_identifier_;

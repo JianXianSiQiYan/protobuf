@@ -1925,7 +1925,7 @@ class PROTOBUF_EXPORT DescriptorPool {
     InternalDontEnforceDependencies();
   }
 
-  // For internal use only.
+  // For internal use only.//没用到
   void internal_set_underlay(const DescriptorPool* underlay) {
     underlay_ = underlay;
   }
@@ -2007,14 +2007,14 @@ class PROTOBUF_EXPORT DescriptorPool {
   internal::WrappedMutex* mutex_;
 
   // See constructor.
-  DescriptorDatabase* fallback_database_;//即source_tree_database
+  DescriptorDatabase* fallback_database_;//即source_tree_database（类型为SourceTreeDescriptorDatabase）
   ErrorCollector* default_error_collector_;
-  const DescriptorPool* underlay_;
+  const DescriptorPool* underlay_;//internal_set_underlay没用到，所以为nullptr
 
   // This class contains a lot of hash maps with complicated types that
   // we'd like to keep out of the header.
   class Tables;
-  std::unique_ptr<Tables> tables_;
+  std::unique_ptr<Tables> tables_;//在构造函数中new
 
   bool enforce_dependencies_;
   bool lazily_build_dependencies_;

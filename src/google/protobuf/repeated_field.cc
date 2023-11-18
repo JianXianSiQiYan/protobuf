@@ -46,10 +46,10 @@ namespace google {
 namespace protobuf {
 
 namespace internal {
-
+//ok 扩充大小，返回的是旧list的后一个元素的指针
 void** RepeatedPtrFieldBase::InternalExtend(int extend_amount) {
   int new_size = current_size_ + extend_amount;
-  if (total_size_ >= new_size) {
+  if (total_size_ >= new_size) {//total_size_已经足够，不必再分配
     // N.B.: rep_ is non-nullptr because extend_amount is always > 0, hence
     // total_size must be non-zero since it is lower-bounded by new_size.
     return &rep_->elements[current_size_];
@@ -57,16 +57,16 @@ void** RepeatedPtrFieldBase::InternalExtend(int extend_amount) {
   Rep* old_rep = rep_;
   Arena* arena = GetArena();
   new_size = std::max(internal::kRepeatedFieldLowerClampLimit,
-                      std::max(total_size_ * 2, new_size));
-  GOOGLE_CHECK_LE(static_cast<int64_t>(new_size),
+                      std::max(total_size_ * 2, new_size));//新的size必须大于kRepeatedFieldLowerClampLimit且大于2倍total_size_
+  GOOGLE_CHECK_LE(static_cast<int64_t>(new_size),//最新的等价大小必须小于size_t
            static_cast<int64_t>(
                (std::numeric_limits<size_t>::max() - kRepHeaderSize) /
                sizeof(old_rep->elements[0])))
       << "Requested size is too large to fit into size_t.";
-  size_t bytes = kRepHeaderSize + sizeof(old_rep->elements[0]) * new_size;
+  size_t bytes = kRepHeaderSize + sizeof(old_rep->elements[0]) * new_size;//最新的等价大小，单位：byte
   if (arena == nullptr) {
-    rep_ = reinterpret_cast<Rep*>(::operator new(bytes));
-  } else {
+    rep_ = reinterpret_cast<Rep*>(::operator new(bytes));//daiding 这种new不知道是什么用法
+  } else {//daiding
     rep_ = reinterpret_cast<Rep*>(Arena::CreateArray<char>(arena, bytes));
   }
 #if defined(__GXX_DELETE_WITH_SIZE__) || defined(__cpp_sized_deallocation)
@@ -84,14 +84,14 @@ void** RepeatedPtrFieldBase::InternalExtend(int extend_amount) {
 #if defined(__GXX_DELETE_WITH_SIZE__) || defined(__cpp_sized_deallocation)
     const size_t old_size =
         old_total_size * sizeof(rep_->elements[0]) + kRepHeaderSize;
-    ::operator delete(static_cast<void*>(old_rep), old_size);
+    ::operator delete(static_cast<void*>(old_rep), old_size);//daiding 这种不知道是什么用法
 #else
     ::operator delete(static_cast<void*>(old_rep));
 #endif
   }
   return &rep_->elements[current_size_];
 }
-
+//ok 扩充大小
 void RepeatedPtrFieldBase::Reserve(int new_size) {
   if (new_size > current_size_) {
     InternalExtend(new_size - current_size_);

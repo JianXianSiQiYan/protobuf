@@ -588,7 +588,7 @@ class PROTOBUF_EXPORT RepeatedPtrFieldBase {//jindu21
  protected:
   constexpr RepeatedPtrFieldBase();
   explicit RepeatedPtrFieldBase(Arena* arena);
-  ~RepeatedPtrFieldBase() {
+  ~RepeatedPtrFieldBase() {//daiding
 #ifndef NDEBUG
     // Try to trigger segfault / asan failure in non-opt builds. If arena_
     // lifetime has ended before the destructor.
@@ -751,7 +751,7 @@ class PROTOBUF_EXPORT RepeatedPtrFieldBase {//jindu21
   // significant performance for memory-sensitive workloads.
   Arena* arena_;
   int current_size_;
-  int total_size_;
+  int total_size_;//上一次在InternalExtend中使用new分配的总元素大小
   struct Rep {
     int allocated_size;
     // Here we declare a huge array as a way of approximating C's "flexible
@@ -761,12 +761,12 @@ class PROTOBUF_EXPORT RepeatedPtrFieldBase {//jindu21
   };
   static constexpr size_t kRepHeaderSize = offsetof(Rep, elements);
   Rep* rep_;
-
-  template <typename TypeHandler>
+  //ok 将指针转换为原来的类型
+  template <typename TypeHandler>//TypeHandler即RepeatedPtrField<Element>::TypeHandler，TypeHandler::Type即Elemnt的类型
   static inline typename TypeHandler::Type* cast(void* element) {
     return reinterpret_cast<typename TypeHandler::Type*>(element);
   }
-  template <typename TypeHandler>
+  template <typename TypeHandler>//ok 将指针转换为原来的类型
   static inline const typename TypeHandler::Type* cast(const void* element) {
     return reinterpret_cast<const typename TypeHandler::Type*>(element);
   }
@@ -837,7 +837,7 @@ class GenericTypeHandler {
   }
   static inline GenericType* NewFromPrototype(const GenericType* prototype,
                                               Arena* arena = nullptr);
-  static inline void Delete(GenericType* value, Arena* arena) {
+  static inline void Delete(GenericType* value, Arena* arena) {//ok
     if (arena == nullptr) {
       delete value;
     }
@@ -846,7 +846,7 @@ class GenericTypeHandler {
     return Arena::GetOwningArena<Type>(value);
   }
 
-  static inline void Clear(GenericType* value) { value->Clear(); }
+  static inline void Clear(GenericType* value) { value->Clear(); }//ok 对value调用Clear，Clear的作用应该是初始化
   PROTOBUF_NOINLINE
   static void Merge(const GenericType& from, GenericType* to);
   static inline size_t SpaceUsedLong(const GenericType& value) {
@@ -932,7 +932,7 @@ class StringTypeHandler {
 // RepeatedPtrField is like RepeatedField, but used for repeated strings or
 // Messages.
 template <typename Element>
-class RepeatedPtrField final : private internal::RepeatedPtrFieldBase {
+class RepeatedPtrField final : private internal::RepeatedPtrFieldBase {//jindu22
  public:
   constexpr RepeatedPtrField();
   explicit RepeatedPtrField(Arena* arena);
@@ -1702,20 +1702,20 @@ namespace internal {
 constexpr RepeatedPtrFieldBase::RepeatedPtrFieldBase()
     : arena_(nullptr), current_size_(0), total_size_(0), rep_(nullptr) {}
 
-inline RepeatedPtrFieldBase::RepeatedPtrFieldBase(Arena* arena)
+inline RepeatedPtrFieldBase::RepeatedPtrFieldBase(Arena* arena)//daiding
     : arena_(arena), current_size_(0), total_size_(0), rep_(nullptr) {}
-
-template <typename TypeHandler>
+//jindu23
+template <typename TypeHandler>//TypeHandler即RepeatedPtrField<Element>::TypeHandler
 void RepeatedPtrFieldBase::Destroy() {
   if (rep_ != nullptr && arena_ == nullptr) {
     int n = rep_->allocated_size;
     void* const* elements = rep_->elements;
     for (int i = 0; i < n; i++) {
-      TypeHandler::Delete(cast<TypeHandler>(elements[i]), nullptr);
+      TypeHandler::Delete(cast<TypeHandler>(elements[i]), nullptr);//delete指针elements[i]，nullptr没有用到
     }
 #if defined(__GXX_DELETE_WITH_SIZE__) || defined(__cpp_sized_deallocation)
     const size_t size = total_size_ * sizeof(elements[0]) + kRepHeaderSize;
-    ::operator delete(static_cast<void*>(rep_), size);
+    ::operator delete(static_cast<void*>(rep_), size);//daiding，这种用法不知道是什么
 #else
     ::operator delete(static_cast<void*>(rep_));
 #endif
@@ -1850,7 +1850,7 @@ void RepeatedPtrFieldBase::Clear() {
 // This calls a shared implementation with most of the logic, passing a function
 // pointer to another type-specific piece of code that calls the object-allocate
 // and merge handlers.
-template <typename TypeHandler>
+template <typename TypeHandler>//即RepeatedPtrField<Element>::TypeHandler
 inline void RepeatedPtrFieldBase::MergeFrom(const RepeatedPtrFieldBase& other) {
   GOOGLE_DCHECK_NE(&other, this);
   if (other.current_size_ == 0) return;
@@ -1858,7 +1858,7 @@ inline void RepeatedPtrFieldBase::MergeFrom(const RepeatedPtrFieldBase& other) {
                     &RepeatedPtrFieldBase::MergeFromInnerLoop<TypeHandler>);
 }
 
-inline void RepeatedPtrFieldBase::MergeFromInternal(
+inline void RepeatedPtrFieldBase::MergeFromInternal(//jindu24
     const RepeatedPtrFieldBase& other,
     void (RepeatedPtrFieldBase::*inner_loop)(void**, void**, int, int)) {
   // Note: wrapper has already guaranteed that other.rep_ != nullptr here.
@@ -2100,7 +2100,7 @@ RepeatedPtrFieldBase::UnsafeArenaReleaseLast() {
   if (current_size_ < rep_->allocated_size) {
     // There are cleared elements on the end; replace the removed element
     // with the last allocated element.
-    rep_->elements[current_size_] = rep_->elements[rep_->allocated_size];
+    rep_->elements[current_size_] = rep_->elements[rep_->allocated_size];//jindu25 看不懂啊怎么办
   }
   return result;
 }
@@ -2146,11 +2146,11 @@ class RepeatedPtrField<std::string>::TypeHandler
     : public internal::StringTypeHandler {};
 
 template <typename Element>
-constexpr RepeatedPtrField<Element>::RepeatedPtrField()
+constexpr RepeatedPtrField<Element>::RepeatedPtrField()//ok
     : RepeatedPtrFieldBase() {}
 
 template <typename Element>
-inline RepeatedPtrField<Element>::RepeatedPtrField(Arena* arena)
+inline RepeatedPtrField<Element>::RepeatedPtrField(Arena* arena)//daiding
     : RepeatedPtrFieldBase(arena) {}
 
 template <typename Element>

@@ -244,14 +244,14 @@ class PROTOBUF_EXPORT Message : public MessageLite {
   // Construct a new instance of the same type.  Ownership is passed to the
   // caller.  (This is also defined in MessageLite, but is defined again here
   // for return-type covariance.)
-  Message* New() const override = 0;
+  Message* New() const override = 0;//ok 举例：对于类Any，return new Any();
 
   // Construct a new instance on the arena. Ownership is passed to the caller
   // if arena is a nullptr. Default implementation allows for API compatibility
   // during the Arena transition.
-  Message* New(Arena* arena) const override {
+  Message* New(Arena* arena) const override {//ok 使用new新建一个对象并返回
     Message* message = New();
-    if (arena != nullptr) {
+    if (arena != nullptr) {//daiding arena暂时不考虑
       arena->Own(message);
     }
     return message;

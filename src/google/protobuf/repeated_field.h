@@ -1863,7 +1863,7 @@ inline void RepeatedPtrFieldBase::MergeFromInternal(//jindu24
     void (RepeatedPtrFieldBase::*inner_loop)(void**, void**, int, int)) {
   // Note: wrapper has already guaranteed that other.rep_ != nullptr here.
   int other_size = other.current_size_;
-  void** other_elements = other.rep_->elements;
+  void** other_elements = other.rep_->elements;//需要merge的元素
   void** new_elements = InternalExtend(other_size);
   int allocated_elems = rep_->allocated_size - current_size_;
   (this->*inner_loop)(new_elements, other_elements, other_size,
@@ -1877,7 +1877,7 @@ inline void RepeatedPtrFieldBase::MergeFromInternal(//jindu24
 // Merges other_elems to our_elems.
 template <typename TypeHandler>
 void RepeatedPtrFieldBase::MergeFromInnerLoop(void** our_elems,
-                                              void** other_elems, int length,
+                                              void** other_elems, int length,//length：需要merge的元素数量
                                               int already_allocated) {
   if (already_allocated < length) {
     Arena* arena = GetArena();
@@ -1886,7 +1886,7 @@ void RepeatedPtrFieldBase::MergeFromInnerLoop(void** our_elems,
     for (int i = already_allocated; i < length; i++) {
       // Allocate a new empty element that we'll merge into below
       typename TypeHandler::Type* new_elem =
-          TypeHandler::NewFromPrototype(elem_prototype, arena);
+          TypeHandler::NewFromPrototype(elem_prototype, arena);//jindu25
       our_elems[i] = new_elem;
     }
   }
@@ -1998,7 +1998,7 @@ void RepeatedPtrFieldBase::AddAllocatedSlowWithCopy(
     my_arena->Own(value);
   } else if (my_arena != value_arena) {
     typename TypeHandler::Type* new_value =
-        TypeHandler::NewFromPrototype(value, my_arena);
+        TypeHandler::NewFromPrototype(value, my_arena);//jindu26 全局搜NewFromPrototype并理解
     TypeHandler::Merge(*value, new_value);
     TypeHandler::Delete(value, value_arena);
     value = new_value;
@@ -2100,7 +2100,7 @@ RepeatedPtrFieldBase::UnsafeArenaReleaseLast() {
   if (current_size_ < rep_->allocated_size) {
     // There are cleared elements on the end; replace the removed element
     // with the last allocated element.
-    rep_->elements[current_size_] = rep_->elements[rep_->allocated_size];//jindu25 看不懂啊怎么办
+    rep_->elements[current_size_] = rep_->elements[rep_->allocated_size];
   }
   return result;
 }
@@ -2520,7 +2520,7 @@ namespace internal {
 // This code based on net/proto/proto-array-internal.h by Jeffrey Yasskin
 // (jyasskin@google.com).
 template <typename Element>
-class RepeatedPtrIterator {
+class RepeatedPtrIterator {//ok
  public:
   using iterator = RepeatedPtrIterator<Element>;
   using iterator_category = std::random_access_iterator_tag;
@@ -2533,12 +2533,12 @@ class RepeatedPtrIterator {
   explicit RepeatedPtrIterator(void* const* it) : it_(it) {}
 
   // Allow "upcasting" from RepeatedPtrIterator<T**> to
-  // RepeatedPtrIterator<const T*const*>.
+  // RepeatedPtrIterator<const T*const*>.//daiding 这句什么意思？
   template <typename OtherElement>
   RepeatedPtrIterator(const RepeatedPtrIterator<OtherElement>& other)
       : it_(other.it_) {
     // Force a compiler error if the other type is not convertible to ours.
-    if (false) {
+    if (false) {//只为了编译器检查，false分支本身不会走到
       implicit_cast<Element*>(static_cast<OtherElement*>(nullptr));
     }
   }
@@ -2548,16 +2548,16 @@ class RepeatedPtrIterator {
   pointer operator->() const { return &(operator*()); }
 
   // {inc,dec}rementable
-  iterator& operator++() {
+  iterator& operator++() {//前缀加加
     ++it_;
     return *this;
   }
-  iterator operator++(int) { return iterator(it_++); }
-  iterator& operator--() {
+  iterator operator++(int) { return iterator(it_++); }//后缀加加
+  iterator& operator--() {//前缀减减
     --it_;
     return *this;
   }
-  iterator operator--(int) { return iterator(it_--); }
+  iterator operator--(int) { return iterator(it_--); }//后缀减减
 
   // equality_comparable
   bool operator==(const iterator& x) const { return it_ == x.it_; }
@@ -2613,7 +2613,7 @@ class RepeatedPtrIterator {
 // referenced by the iterator.  It should either be "void *" for a mutable
 // iterator, or "const void* const" for a constant iterator.
 template <typename Element, typename VoidPtr>
-class RepeatedPtrOverPtrsIterator {
+class RepeatedPtrOverPtrsIterator {//ok
  public:
   using iterator = RepeatedPtrOverPtrsIterator<Element, VoidPtr>;
   using iterator_category = std::random_access_iterator_tag;
@@ -2626,20 +2626,20 @@ class RepeatedPtrOverPtrsIterator {
   explicit RepeatedPtrOverPtrsIterator(VoidPtr* it) : it_(it) {}
 
   // dereferenceable
-  reference operator*() const { return *reinterpret_cast<Element*>(it_); }
+  reference operator*() const { return *reinterpret_cast<Element*>(*it_); }
   pointer operator->() const { return &(operator*()); }
 
   // {inc,dec}rementable
-  iterator& operator++() {
+  iterator& operator++() {//前缀加加
     ++it_;
     return *this;
   }
-  iterator operator++(int) { return iterator(it_++); }
-  iterator& operator--() {
+  iterator operator++(int) { return iterator(it_++); }//后缀加加
+  iterator& operator--() {//前缀减减
     --it_;
     return *this;
   }
-  iterator operator--(int) { return iterator(it_--); }
+  iterator operator--(int) { return iterator(it_--); }//后缀减减
 
   // equality_comparable
   bool operator==(const iterator& x) const { return it_ == x.it_; }

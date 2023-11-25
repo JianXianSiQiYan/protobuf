@@ -215,7 +215,7 @@ class PROTOBUF_EXPORT MessageLite {
 
   // Construct a new instance of the same type.  Ownership is passed to the
   // caller.
-  virtual MessageLite* New() const = 0;
+  virtual MessageLite* New() const = 0;//例子：对于类Any，return new Any();
 
   // Construct a new instance on the arena. Ownership is passed to the caller
   // if arena is a nullptr. Default implementation for backwards compatibility.

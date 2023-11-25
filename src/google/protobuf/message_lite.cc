@@ -193,10 +193,10 @@ template bool MergeFromImpl<true>(BoundedZCIS input, MessageLite* msg,
                                   MessageLite::ParseFlags parse_flags);
 
 }  // namespace internal
-
+//ok 调用new新建一个对象并返回
 MessageLite* MessageLite::New(Arena* arena) const {
   MessageLite* message = New();
-  if (arena != nullptr) {
+  if (arena != nullptr) {//daiding arena暂时不考虑
     arena->Own(message);
   }
   return message;

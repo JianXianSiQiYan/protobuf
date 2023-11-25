@@ -58,7 +58,7 @@ namespace internal {
 // but the proposal was submitted too late.  It will probably make
 // its way into the language in the future.
 template<typename To, typename From>
-inline To implicit_cast(From const &f) {
+inline To implicit_cast(From const &f) {//daiding 不明所以
   return f;
 }
 

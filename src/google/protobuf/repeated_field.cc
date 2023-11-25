@@ -126,7 +126,7 @@ void* RepeatedPtrFieldBase::AddOutOfLineHelper(void* obj) {
 }
 
 void RepeatedPtrFieldBase::CloseGap(int start, int num) {
-  if (rep_ == nullptr) return;
+  if (rep_ == nullptr) return;//daiding
   // Close up a gap of "num" elements starting at offset "start".
   for (int i = start + num; i < rep_->allocated_size; ++i)
     rep_->elements[i - num] = rep_->elements[i];

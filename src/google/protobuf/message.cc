@@ -377,7 +377,7 @@ template <>
 PROTOBUF_NOINLINE
 #endif
     Message*
-    GenericTypeHandler<Message>::NewFromPrototype(const Message* prototype,
+    GenericTypeHandler<Message>::NewFromPrototype(const Message* prototype,//ok 使用new新建一个对象并返回
                                                   Arena* arena) {
   return prototype->New(arena);
 }

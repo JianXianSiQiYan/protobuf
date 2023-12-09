@@ -512,7 +512,7 @@ std::string MessageLite::SerializePartialAsString() const {
 
 namespace internal {
 
-template <>
+template <>//ok 调用new新建一个对象并返回
 MessageLite* GenericTypeHandler<MessageLite>::NewFromPrototype(
     const MessageLite* prototype, Arena* arena) {
   return prototype->New(arena);

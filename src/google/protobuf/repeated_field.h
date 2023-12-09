@@ -102,7 +102,7 @@ constexpr int kRepeatedFieldUpperClampLimit =
 void LogIndexOutOfBounds(int index, int size);
 
 template <typename Iter>
-inline int CalculateReserve(Iter begin, Iter end, std::forward_iterator_tag) {
+inline int CalculateReserve(Iter begin, Iter end, std::forward_iterator_tag) {//jindu24
   return static_cast<int>(std::distance(begin, end));
 }
 
@@ -750,10 +750,10 @@ class PROTOBUF_EXPORT RepeatedPtrFieldBase {//jindu21
   // Placing all fields directly in the RepeatedPtrFieldBase instance costs
   // significant performance for memory-sensitive workloads.
   Arena* arena_;
-  int current_size_;
+  int current_size_;//当前在用的元素数量
   int total_size_;//上一次在InternalExtend中使用new分配的总元素大小
   struct Rep {
-    int allocated_size;
+    int allocated_size;//=current_size_+被移除的元素个数
     // Here we declare a huge array as a way of approximating C's "flexible
     // array member" feature without relying on undefined behavior.
     void* elements[(std::numeric_limits<int>::max() - 2 * sizeof(int)) /
@@ -854,12 +854,12 @@ class GenericTypeHandler {
   }
 };
 
-template <typename GenericType>
+template <typename GenericType>//daiding 涉及arena暂时不管
 GenericType* GenericTypeHandler<GenericType>::NewFromPrototype(
     const GenericType* /* prototype */, Arena* arena) {
   return New(arena);
 }
-template <typename GenericType>
+template <typename GenericType>//ok
 void GenericTypeHandler<GenericType>::Merge(const GenericType& from,
                                             GenericType* to) {
   to->MergeFrom(from);
@@ -1704,7 +1704,7 @@ constexpr RepeatedPtrFieldBase::RepeatedPtrFieldBase()
 
 inline RepeatedPtrFieldBase::RepeatedPtrFieldBase(Arena* arena)//daiding
     : arena_(arena), current_size_(0), total_size_(0), rep_(nullptr) {}
-//jindu23
+//ok 对allocated_size调用Delete，执行析构，对（total_size_ * sizeof(elements[0]) + kRepHeaderSize），调用delete
 template <typename TypeHandler>//TypeHandler即RepeatedPtrField<Element>::TypeHandler
 void RepeatedPtrFieldBase::Destroy() {
   if (rep_ != nullptr && arena_ == nullptr) {
@@ -1851,14 +1851,14 @@ void RepeatedPtrFieldBase::Clear() {
 // pointer to another type-specific piece of code that calls the object-allocate
 // and merge handlers.
 template <typename TypeHandler>//即RepeatedPtrField<Element>::TypeHandler
-inline void RepeatedPtrFieldBase::MergeFrom(const RepeatedPtrFieldBase& other) {
+inline void RepeatedPtrFieldBase::MergeFrom(const RepeatedPtrFieldBase& other) {//ok merge other
   GOOGLE_DCHECK_NE(&other, this);
   if (other.current_size_ == 0) return;
   MergeFromInternal(other,
                     &RepeatedPtrFieldBase::MergeFromInnerLoop<TypeHandler>);
 }
-
-inline void RepeatedPtrFieldBase::MergeFromInternal(//jindu24
+//ok merge other
+inline void RepeatedPtrFieldBase::MergeFromInternal(
     const RepeatedPtrFieldBase& other,
     void (RepeatedPtrFieldBase::*inner_loop)(void**, void**, int, int)) {
   // Note: wrapper has already guaranteed that other.rep_ != nullptr here.
@@ -1874,19 +1874,19 @@ inline void RepeatedPtrFieldBase::MergeFromInternal(//jindu24
   }
 }
 
-// Merges other_elems to our_elems.
-template <typename TypeHandler>
-void RepeatedPtrFieldBase::MergeFromInnerLoop(void** our_elems,
-                                              void** other_elems, int length,//length：需要merge的元素数量
-                                              int already_allocated) {
+// Merges other_elems to our_elems.//ok
+template <typename TypeHandler>//即RepeatedPtrField<Element>::TypeHandler，一般都是PB类型
+void RepeatedPtrFieldBase::MergeFromInnerLoop(void** our_elems,//our_elems：旧list尾元素的下一个元素
+                                              void** other_elems, int length,//length：需要merge的元素数量//other_elems：需要merge的元素
+                                              int already_allocated) {//already_allocated分配了但暂时移除了的元素数量
   if (already_allocated < length) {
     Arena* arena = GetArena();
-    typename TypeHandler::Type* elem_prototype =
+    typename TypeHandler::Type* elem_prototype =    //TypeHandler::Type是PB类型
         reinterpret_cast<typename TypeHandler::Type*>(other_elems[0]);
-    for (int i = already_allocated; i < length; i++) {
+    for (int i = already_allocated; i < length; i++) {//从already_allocated这个index开始补元素
       // Allocate a new empty element that we'll merge into below
       typename TypeHandler::Type* new_elem =
-          TypeHandler::NewFromPrototype(elem_prototype, arena);//jindu25
+          TypeHandler::NewFromPrototype(elem_prototype, arena);
       our_elems[i] = new_elem;
     }
   }
@@ -1897,7 +1897,7 @@ void RepeatedPtrFieldBase::MergeFromInnerLoop(void** our_elems,
         reinterpret_cast<typename TypeHandler::Type*>(other_elems[i]);
     typename TypeHandler::Type* new_elem =
         reinterpret_cast<typename TypeHandler::Type*>(our_elems[i]);
-    TypeHandler::Merge(*other_elem, new_elem);
+    TypeHandler::Merge(*other_elem, new_elem);//最终调用pb类型的MergeFrom
   }
 }
 
@@ -1998,7 +1998,7 @@ void RepeatedPtrFieldBase::AddAllocatedSlowWithCopy(
     my_arena->Own(value);
   } else if (my_arena != value_arena) {
     typename TypeHandler::Type* new_value =
-        TypeHandler::NewFromPrototype(value, my_arena);//jindu26 全局搜NewFromPrototype并理解
+        TypeHandler::NewFromPrototype(value, my_arena);
     TypeHandler::Merge(*value, new_value);
     TypeHandler::Delete(value, value_arena);
     value = new_value;
@@ -2152,7 +2152,7 @@ constexpr RepeatedPtrField<Element>::RepeatedPtrField()//ok
 template <typename Element>
 inline RepeatedPtrField<Element>::RepeatedPtrField(Arena* arena)//daiding
     : RepeatedPtrFieldBase(arena) {}
-
+//ok
 template <typename Element>
 inline RepeatedPtrField<Element>::RepeatedPtrField(
     const RepeatedPtrField& other)
@@ -2266,7 +2266,7 @@ inline void RepeatedPtrField<Element>::Add(Element&& value) {
 
 template <typename Element>
 template <typename Iter>
-inline void RepeatedPtrField<Element>::Add(Iter begin, Iter end) {
+inline void RepeatedPtrField<Element>::Add(Iter begin, Iter end) {//jindu23
   int reserve = internal::CalculateReserve(begin, end);
   if (reserve != -1) {
     Reserve(size() + reserve);
@@ -2385,7 +2385,7 @@ template <typename Element>
 inline void RepeatedPtrField<Element>::Clear() {
   RepeatedPtrFieldBase::Clear<TypeHandler>();
 }
-
+//ok
 template <typename Element>
 inline void RepeatedPtrField<Element>::MergeFrom(
     const RepeatedPtrField& other) {

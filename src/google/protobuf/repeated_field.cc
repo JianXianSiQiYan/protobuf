@@ -46,7 +46,7 @@ namespace google {
 namespace protobuf {
 
 namespace internal {
-//ok 扩充大小，返回的是旧list的后一个元素的指针
+//ok 扩充大小，返回的是旧list的后一个元素的指针//extend_amount：除了current_size_之外，还需要的大小
 void** RepeatedPtrFieldBase::InternalExtend(int extend_amount) {
   int new_size = current_size_ + extend_amount;
   if (total_size_ >= new_size) {//total_size_已经足够，不必再分配
@@ -91,7 +91,7 @@ void** RepeatedPtrFieldBase::InternalExtend(int extend_amount) {
   }
   return &rep_->elements[current_size_];
 }
-//ok 扩充大小
+//ok 扩充大小//new_size：需要的总大小
 void RepeatedPtrFieldBase::Reserve(int new_size) {
   if (new_size > current_size_) {
     InternalExtend(new_size - current_size_);

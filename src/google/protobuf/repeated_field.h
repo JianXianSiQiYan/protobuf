@@ -101,18 +101,18 @@ constexpr int kRepeatedFieldUpperClampLimit =
 // A utility function for logging that doesn't need any template types.
 void LogIndexOutOfBounds(int index, int size);
 
-template <typename Iter>
-inline int CalculateReserve(Iter begin, Iter end, std::forward_iterator_tag) {//jindu24
+template <typename Iter>//ok 计算两个迭代器之间的距离
+inline int CalculateReserve(Iter begin, Iter end, std::forward_iterator_tag) {
   return static_cast<int>(std::distance(begin, end));
 }
 
-template <typename Iter>
+template <typename Iter>//ok
 inline int CalculateReserve(Iter /*begin*/, Iter /*end*/,
                             std::input_iterator_tag /*unused*/) {
   return -1;
 }
 
-template <typename Iter>
+template <typename Iter>//daiding 没用到
 inline int CalculateReserve(Iter begin, Iter end) {
   typedef typename std::iterator_traits<Iter>::iterator_category Category;
   return CalculateReserve(begin, end, Category());
@@ -711,7 +711,7 @@ class PROTOBUF_EXPORT RepeatedPtrFieldBase {//jindu21
   int ClearedCount() const;
   template <typename TypeHandler>
   void AddCleared(typename TypeHandler::Type* value);
-  template <typename TypeHandler>
+  template <typename TypeHandler>//ok 将指针value剥离出rep_->elements，并返回
   PROTOBUF_MUST_USE_RESULT typename TypeHandler::Type* ReleaseCleared();
 
   template <typename TypeHandler>
@@ -760,7 +760,7 @@ class PROTOBUF_EXPORT RepeatedPtrFieldBase {//jindu21
                    sizeof(void*)];
   };
   static constexpr size_t kRepHeaderSize = offsetof(Rep, elements);
-  Rep* rep_;
+  Rep* rep_;//跟InternalExtend很相关
   //ok 将指针转换为原来的类型
   template <typename TypeHandler>//TypeHandler即RepeatedPtrField<Element>::TypeHandler，TypeHandler::Type即Elemnt的类型
   static inline typename TypeHandler::Type* cast(void* element) {
@@ -1757,7 +1757,7 @@ void RepeatedPtrFieldBase::SwapFallback(RepeatedPtrFieldBase* other) {
 
 inline bool RepeatedPtrFieldBase::empty() const { return current_size_ == 0; }
 
-inline int RepeatedPtrFieldBase::size() const { return current_size_; }
+inline int RepeatedPtrFieldBase::size() const { return current_size_; }//ok 返回当前在用的元素数量
 
 template <typename TypeHandler>
 inline const typename TypeHandler::Type& RepeatedPtrFieldBase::Get(
@@ -2104,11 +2104,11 @@ RepeatedPtrFieldBase::UnsafeArenaReleaseLast() {
   }
   return result;
 }
-
+//ok 返回被clear的元素数量
 inline int RepeatedPtrFieldBase::ClearedCount() const {
   return rep_ ? (rep_->allocated_size - current_size_) : 0;
 }
-
+//ok 将指针value给到rep_->elements管理
 template <typename TypeHandler>
 inline void RepeatedPtrFieldBase::AddCleared(
     typename TypeHandler::Type* value) {
@@ -2121,7 +2121,7 @@ inline void RepeatedPtrFieldBase::AddCleared(
   }
   rep_->elements[rep_->allocated_size++] = value;
 }
-
+//ok 将指针value剥离出rep_->elements，并返回
 template <typename TypeHandler>
 inline typename TypeHandler::Type* RepeatedPtrFieldBase::ReleaseCleared() {
   GOOGLE_DCHECK(GetArena() == nullptr)
@@ -2228,7 +2228,7 @@ inline bool RepeatedPtrField<Element>::empty() const {
   return RepeatedPtrFieldBase::empty();
 }
 
-template <typename Element>
+template <typename Element>//ok 返回当前在用的元素数量
 inline int RepeatedPtrField<Element>::size() const {
   return RepeatedPtrFieldBase::size();
 }
@@ -2266,13 +2266,13 @@ inline void RepeatedPtrField<Element>::Add(Element&& value) {
 
 template <typename Element>
 template <typename Iter>
-inline void RepeatedPtrField<Element>::Add(Iter begin, Iter end) {//jindu23
+inline void RepeatedPtrField<Element>::Add(Iter begin, Iter end) {
   int reserve = internal::CalculateReserve(begin, end);
   if (reserve != -1) {
-    Reserve(size() + reserve);
+    Reserve(size() + reserve);//reserve：需要添加的大小，如果当前空余空间不够，则进行扩容
   }
   for (; begin != end; ++begin) {
-    *Add() = *begin;
+    *Add() = *begin;//jindu23
   }
 }
 
@@ -2483,18 +2483,18 @@ inline int RepeatedPtrField<Element>::ClearedCount() const {
 }
 
 #ifndef PROTOBUF_FUTURE_BREAKING_CHANGES
-template <typename Element>
+template <typename Element>//ok 把指针value给到rep_->elements管理
 inline void RepeatedPtrField<Element>::AddCleared(Element* value) {
   return RepeatedPtrFieldBase::AddCleared<TypeHandler>(value);
 }
 
-template <typename Element>
+template <typename Element>//ok 将指针value剥离出rep_->elements，并返回
 inline Element* RepeatedPtrField<Element>::ReleaseCleared() {
   return RepeatedPtrFieldBase::ReleaseCleared<TypeHandler>();
 }
 #endif  // !PROTOBUF_FUTURE_BREAKING_CHANGES
 
-template <typename Element>
+template <typename Element>//ok new_size：需要的总大小，如果当前大小不够，则进行扩大
 inline void RepeatedPtrField<Element>::Reserve(int new_size) {
   return RepeatedPtrFieldBase::Reserve(new_size);
 }
